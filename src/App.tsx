@@ -1,5 +1,6 @@
 import { Shield, ChevronRight } from 'lucide-react'
 import { PokemonSearch } from './components/Teambuilder/PokemonSearch'
+import { TeamSwitcher } from './components/Teambuilder/TeamSwitcher'
 import { TeamSidebar } from './components/Teambuilder/TeamSidebar'
 import { PokemonDetail } from './components/Teambuilder/PokemonDetail'
 import { TeamAnalysis } from './components/Teambuilder/TeamAnalysis'
@@ -48,6 +49,7 @@ function App() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Left Sidebar - Team Selection */}
           <aside className="lg:w-1/4 xl:w-1/5">
+            <TeamSwitcher />
             <TeamSidebar />
           </aside>
 
