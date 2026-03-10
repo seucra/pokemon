@@ -1,0 +1,53 @@
+export type PokemonType = 
+  | 'normal' | 'fire' | 'water' | 'electric' | 'grass' | 'ice' 
+  | 'fighting' | 'poison' | 'ground' | 'flying' | 'psychic' | 'bug' 
+  | 'rock' | 'ghost' | 'dragon' | 'dark' | 'steel' | 'fairy';
+
+export interface Pokemon {
+  id: number;
+  name: string;
+  types: {
+    slot: number;
+    type: {
+      name: PokemonType;
+      url: string;
+    };
+  }[];
+  sprites: {
+    front_default: string;
+    other?: {
+      'official-artwork'?: {
+        front_default: string;
+      };
+      showdown?: {
+        front_default: string;
+      }
+    }
+  };
+  stats: {
+    base_stat: number;
+    stat: {
+      name: string;
+    }
+  }[];
+  abilities: {
+    ability: {
+      name: string;
+    }
+  }[];
+}
+
+export interface TeamMember {
+  pokemon: Pokemon | null;
+  moves: string[];
+  ability: string;
+  item: string;
+  nature: string;
+  evs: { [key: string]: number };
+  ivs: { [key: string]: number };
+}
+
+export interface TeamState {
+  members: (TeamMember | null)[];
+  activeMemberIndex: number;
+}

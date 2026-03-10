@@ -1,0 +1,49 @@
+# ⚡ Pokémon Nerd-Hub: Project Proposals & Tech Stack
+
+This project is ambitious—starting as a **Team Builder & Coverage Tool** and expanding into a **Full-Fledged Game (Battle Engine/RPG)**. To succeed, we need a robust foundation.
+
+## 🛠️ Recommended Tech Stack
+
+For a project of this scale, I recommend **Vite + React + TypeScript**.
+
+| Component | Recommendation | Why? |
+|---|---|---|
+| **Bundler/Dev Server** | **Vite** | Blazing fast, modern, and standard for new web apps. |
+| **Framework** | **React** | Component-based architecture is perfect for "Nerd" tools (UI widgets, charts, team slots). |
+| **Language** | **TypeScript** | **Non-negotiable** for a game/simulator. Type safety for 1000+ Pokémon, moves, and types is critical. |
+| **Styling** | **Tailwind CSS** | Ready-made utility for complex dashboards and responsive grids. |
+| **State Management** | **Zustand** | Lightweight and easy to manage "global" state like your current active team. |
+| **Data Source** | **PokéAPI** | The industry standard REST API for Pokémon data. |
+
+---
+
+## 🏗️ Roadmap (The "Nerd" Path)
+
+### Phase 1: The Architect (Team Builder)
+- Team slot management (6 slots).
+- Type coverage matrix (analyze resistances/weaknesses).
+- Move set validation.
+- Export to "Showdown" format.
+
+### Phase 2: The Strategist (Data Hub)
+- Advanced Pokédex with detailed stat breakdowns (IV/EV calculators).
+- Damage Calculator (simulating specific matchups).
+
+### Phase 3: The Trainer (The Game)
+- Turn-based battle engine.
+- AI "Wild Pokémon" or "Trainer" logic.
+- Sprite-based animations (using canvas or spritesheets).
+
+---
+
+## 📝 Requests for You (Resources & Decisions)
+
+Please check these items:
+
+1. **Framework Confirmation**: Are you comfortable with **React + TypeScript**? If you prefer Vue, Svelte, or Vanilla JS, let me know.
+2. **Assets**: Do you have a preferred source for sprites? (e.g., animated Gen 5 sprites vs static modern ones).
+3. **Scope**: Should we start by initializing a **Vite** project in the `/pokemon` folder?
+4. **Data Persistence**: Do you want a backend later (to save teams to a database) or should we stick to `localStorage` for now?
+
+---
+*I will use this file for our lengthy architecture discussions and resource requests.*
