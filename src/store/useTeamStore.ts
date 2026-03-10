@@ -1,11 +1,21 @@
 import { create } from 'zustand';
-import type { TeamState, TeamMember, Pokemon } from '../types/pokemon';
+import { persist } from 'zustand/middleware';
+import type { TeamState, TeamMember, Pokemon, Team } from '../types/pokemon';
 
-interface TeamStore extends TeamState {
+interface TeamActions {
   addMember: (index: number, pokemon: Pokemon) => void;
   removeMember: (index: number) => void;
   updateMember: (index: number, updates: Partial<TeamMember>) => void;
   setActiveIndex: (index: number) => void;
+  addTeam: (name?: string) => void;
+  removeTeam: (id: string) => void;
+  setActiveTeamId: (id: string) => void;
+  renameTeam: (id: string, name: string) => void;
+}
+
+interface TeamStore extends TeamState, TeamActions {
+  // Helper to get active team for UI
+  getActiveTeam: () => Team;
 }
 
 const initialMember: TeamMember = {
@@ -18,33 +28,96 @@ const initialMember: TeamMember = {
   ivs: { hp: 31, atk: 31, def: 31, spa: 31, spd: 31, spe: 31 },
 };
 
-export const useTeamStore = create<TeamStore>((set) => ({
+const createEmptyTeam = (name: string): Team => ({
+  id: crypto.randomUUID(),
+  name,
   members: Array(6).fill(null).map(() => ({ ...initialMember })),
-  activeMemberIndex: 0,
-  
-  addMember: (index, pokemon) => set((state) => {
-    const newMembers = [...state.members];
-    newMembers[index] = { 
-      ...initialMember, 
-      pokemon,
-      ability: pokemon.abilities[0]?.ability.name || '',
-    };
-    return { members: newMembers };
-  }),
+});
 
-  removeMember: (index) => set((state) => {
-    const newMembers = [...state.members];
-    newMembers[index] = { ...initialMember };
-    return { members: newMembers };
-  }),
+const defaultTeam = createEmptyTeam('New Team');
 
-  updateMember: (index, updates) => set((state) => {
-    const newMembers = [...state.members];
-    if (newMembers[index]) {
-      newMembers[index] = { ...newMembers[index], ...updates };
+export const useTeamStore = create<TeamStore>()(
+  persist(
+    (set, get) => ({
+      teams: [defaultTeam],
+      activeTeamId: defaultTeam.id,
+      activeMemberIndex: 0,
+
+      getActiveTeam: () => {
+        const state = get();
+        return state.teams.find((t) => t.id === state.activeTeamId) || state.teams[0];
+      },
+
+      addTeam: (name = 'New Team') => set((state) => {
+        const newTeam = createEmptyTeam(name);
+        return {
+          teams: [...state.teams, newTeam],
+          activeTeamId: newTeam.id,
+          activeMemberIndex: 0,
+        };
+      }),
+
+      removeTeam: (id) => set((state) => {
+        if (state.teams.length <= 1) return state; // Don't delete last team
+        const newTeams = state.teams.filter((t) => t.id !== id);
+        return {
+          teams: newTeams,
+          activeTeamId: state.activeTeamId === id ? newTeams[0].id : state.activeTeamId,
+        };
+      }),
+
+      setActiveTeamId: (id) => set({ activeTeamId: id, activeMemberIndex: 0 }),
+
+      renameTeam: (id, name) => set((state) => ({
+        teams: state.teams.map((t) => t.id === id ? { ...t, name } : t),
+      })),
+
+      addMember: (index, pokemon) => set((state) => {
+        const newTeams = state.teams.map((team) => {
+          if (team.id === state.activeTeamId) {
+            const newMembers = [...team.members];
+            newMembers[index] = { 
+              ...initialMember, 
+              pokemon,
+              ability: pokemon.abilities[0]?.ability.name || '',
+            };
+            return { ...team, members: newMembers };
+          }
+          return team;
+        });
+        return { teams: newTeams };
+      }),
+
+      removeMember: (index) => set((state) => {
+        const newTeams = state.teams.map((team) => {
+          if (team.id === state.activeTeamId) {
+            const newMembers = [...team.members];
+            newMembers[index] = { ...initialMember };
+            return { ...team, members: newMembers };
+          }
+          return team;
+        });
+        return { teams: newTeams };
+      }),
+
+      updateMember: (index, updates) => set((state) => {
+        const newTeams = state.teams.map((team) => {
+          if (team.id === state.activeTeamId) {
+            const newMembers = [...team.members];
+            if (newMembers[index]) {
+              newMembers[index] = { ...newMembers[index], ...updates };
+            }
+            return { ...team, members: newMembers };
+          }
+          return team;
+        });
+        return { teams: newTeams };
+      }),
+
+      setActiveIndex: (index) => set({ activeMemberIndex: index }),
+    }),
+    {
+      name: 'pokemon-craze-storage',
     }
-    return { members: newMembers };
-  }),
-
-  setActiveIndex: (index) => set({ activeMemberIndex: index }),
-}));
+  )
+);

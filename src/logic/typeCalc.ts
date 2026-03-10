@@ -2,7 +2,7 @@ import type { PokemonType } from '../types/pokemon';
 
 export type DamageRelation = 0 | 0.25 | 0.5 | 1 | 2 | 4;
 
-const TYPE_CHART: Record<PokemonType, Partial<Record<PokemonType, number>>> = {
+export const TYPE_CHART: Record<PokemonType, Partial<Record<PokemonType, number>>> = {
   normal: { rock: 0.5, ghost: 0, steel: 0.5 },
   fire: { fire: 0.5, water: 0.5, grass: 2, ice: 2, bug: 2, rock: 0.5, dragon: 0.5, steel: 2 },
   water: { fire: 2, water: 0.5, grass: 0.5, ground: 2, rock: 2, dragon: 0.5 },
@@ -23,6 +23,32 @@ const TYPE_CHART: Record<PokemonType, Partial<Record<PokemonType, number>>> = {
   fairy: { fire: 0.5, fighting: 2, poison: 0.5, dragon: 2, dark: 2, steel: 0.5 },
 };
 
+export const TYPE_DESCRIPTIONS: Record<string, string> = {
+  normal: "Standard moves with consistent, reliable damage. Ghost-immune.",
+  fire: "Blazing attacks, effective against Grass, Ice, Bug, and Steel.",
+  water: "Fluid moves, crushing Fire, Ground, and Rock.",
+  electric: "Shocking power. Flying and Water Pokémons' bane.",
+  grass: "Nature's force. Overwhelms Water, Ground, and Rock.",
+  ice: "Freezing chill. Shatters Dragons, Flying, Grass, and Ground.",
+  fighting: "Physical prowess. Breaks Normal, Ice, Rock, Dark, and Steel.",
+  poison: "Toxic strikes. Corrodes Grass and Fairy types.",
+  ground: "Earthen might. Devastates Fire, Electric, Poison, Rock, and Steel.",
+  flying: "Arial supremacy. Swift against Grass, Fighting, and Bug.",
+  psychic: "Mental dominance. Strong against Fighting and Poison.",
+  bug: "Insect resilience. Bites through Grass, Psychic, and Dark.",
+  rock: "Solid impact. Crushes Fire, Ice, Flying, and Bug.",
+  ghost: "Ethereal presence. Ghost and Psychic types' nightmare.",
+  dragon: "Ancient power. Only weak to other Dragons, Ice, and Fairy.",
+  dark: "Shadowy trickery. Effective against Psychic and Ghost.",
+  steel: "Indestructible. Shines against Ice, Rock, and Fairy.",
+  fairy: "Magical charm. Conquers Dragons, Fighting, and Dark.",
+  weakness: "Multiplies incoming damage by x2 or x4. Be careful!",
+  resistance: "Halves (x0.5) or quarters (x0.25) incoming damage. Excellent for defending.",
+  immunity: "Completely neglects (x0) incoming damage of this type.",
+  ability: "A passive effect that grants unique battle advantages.",
+  typechart: "A matrix showing how types interact defensively and offensively.",
+};
+
 export const getTypeEffectiveness = (attacker: PokemonType, defenders: PokemonType[]): number => {
   return defenders.reduce((acc, defender) => {
     const multiplier = TYPE_CHART[attacker]?.[defender] ?? 1;
@@ -39,4 +65,30 @@ export const getDefensiveCoverage = (types: PokemonType[]): Record<PokemonType, 
   });
 
   return coverage as Record<PokemonType, number>;
+};
+
+export interface TeamCoverageSummary {
+  type: PokemonType;
+  weak: number; // members weak to this type
+  resist: number; // members resistant to this type
+  immune: number; // members immune to this type
+}
+
+export const getTeamCoverage = (teamTypes: PokemonType[][]): TeamCoverageSummary[] => {
+  const allTypes: PokemonType[] = Object.keys(TYPE_CHART) as PokemonType[];
+  
+  return allTypes.map((attacker) => {
+    let weak = 0;
+    let resist = 0;
+    let immune = 0;
+
+    teamTypes.forEach((defTypes) => {
+      const mult = getTypeEffectiveness(attacker, defTypes);
+      if (mult > 1) weak++;
+      else if (mult === 0) immune++;
+      else if (mult < 1) resist++;
+    });
+
+    return { type: attacker, weak, resist, immune };
+  });
 };

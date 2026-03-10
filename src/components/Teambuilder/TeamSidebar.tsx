@@ -5,7 +5,8 @@ import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
 export const TeamSidebar: React.FC = () => {
-  const { members, activeMemberIndex, setActiveIndex, removeMember } = useTeamStore();
+  const { getActiveTeam, activeMemberIndex, setActiveIndex, removeMember } = useTeamStore();
+  const members = getActiveTeam().members;
 
   return (
     <div className="flex flex-col gap-4">

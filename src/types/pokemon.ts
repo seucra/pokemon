@@ -47,7 +47,14 @@ export interface TeamMember {
   ivs: { [key: string]: number };
 }
 
-export interface TeamState {
+export interface Team {
+  id: string;
+  name: string;
   members: (TeamMember | null)[];
+}
+
+export interface TeamState {
+  teams: Team[];
+  activeTeamId: string;
   activeMemberIndex: number;
 }

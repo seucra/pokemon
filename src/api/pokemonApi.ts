@@ -21,5 +21,20 @@ export const pokemonApi = {
     const response = await fetch(`${BASE_URL}/pokemon?limit=2000`);
     const data = await response.json();
     return data.results.map((p: any) => p.name);
+  },
+
+  /**
+   * Fetch ability effect description
+   */
+  async getAbilityDescription(name: string): Promise<string> {
+    try {
+      const response = await fetch(`${BASE_URL}/ability/${name.toLowerCase()}`);
+      if (!response.ok) return "No description available.";
+      const data = await response.json();
+      const entry = data.effect_entries.find((e: any) => e.language.name === 'en') || data.flavor_text_entries.find((e: any) => e.language.name === 'en');
+      return entry?.short_effect || entry?.effect || entry?.flavor_text || "No description available.";
+    } catch {
+      return "Failed to load description.";
+    }
   }
 };

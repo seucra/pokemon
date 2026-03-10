@@ -2,6 +2,7 @@ import { Shield, ChevronRight } from 'lucide-react'
 import { PokemonSearch } from './components/Teambuilder/PokemonSearch'
 import { TeamSidebar } from './components/Teambuilder/TeamSidebar'
 import { PokemonDetail } from './components/Teambuilder/PokemonDetail'
+import { TeamAnalysis } from './components/Teambuilder/TeamAnalysis'
 import { useTeamStore } from './store/useTeamStore'
 
 function App() {
@@ -34,9 +35,9 @@ function App() {
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-8 space-y-12">
         {/* Breadcrumbs */}
-        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-8 px-2">
+        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-600 px-2">
           <span>Home</span>
           <ChevronRight className="w-3 h-3" />
           <span className="text-cyan-500">Team Builder</span>
@@ -70,6 +71,11 @@ function App() {
               <PokemonDetail />
             </div>
           </section>
+        </div>
+
+        {/* Team Analysis Section */}
+        <div className="w-full">
+          <TeamAnalysis />
         </div>
       </main>
     </div>
