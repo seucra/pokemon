@@ -36,6 +36,8 @@ export interface Pokemon {
     };
     is_hidden: boolean;
   }[];
+  height: number;
+  weight: number;
 }
 
 export interface TeamMember {

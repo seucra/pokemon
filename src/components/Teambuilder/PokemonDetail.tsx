@@ -1,282 +1,182 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useTeamStore } from '../../store/useTeamStore';
-import { Zap, BarChart3, Fingerprint, Swords, Info } from 'lucide-react';
-import type { PokemonType } from '../../types/pokemon';
-import { getDefensiveCoverage, TYPE_DESCRIPTIONS } from '../../logic/typeCalc';
-import { pokemonApi } from '../../api/pokemonApi';
+import { Zap, Heart, Info, Star } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
+import { TypeChart } from './TypeChart';
 
-const TYPE_COLORS: Record<PokemonType, string> = {
-  normal: 'bg-gray-400', fire: 'bg-orange-500', water: 'bg-blue-500',
-  electric: 'bg-yellow-400', grass: 'bg-green-500', ice: 'bg-cyan-300',
-  fighting: 'bg-red-700', poison: 'bg-purple-500', ground: 'bg-yellow-700',
-  flying: 'bg-indigo-300', psychic: 'bg-pink-500', bug: 'bg-lime-500',
-  rock: 'bg-yellow-800', ghost: 'bg-indigo-700', dragon: 'bg-indigo-600',
-  dark: 'bg-gray-700', steel: 'bg-slate-400', fairy: 'bg-pink-300'
+const STAT_COLORS: Record<string, string> = {
+  hp: 'bg-rose-500',
+  attack: 'bg-orange-500',
+  defense: 'bg-yellow-500',
+  'special-attack': 'bg-blue-400',
+  'special-defense': 'bg-green-500',
+  speed: 'bg-pink-500',
 };
 
-const Tooltip: React.FC<{ title: string; text: string; children: React.ReactNode }> = ({ title, text, children }) => {
-  const [visible, setVisible] = useState(false);
-  
-  return (
-    <div 
-      className="relative group cursor-help inline-block"
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-    >
-      {children}
-      {visible && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 z-[100] w-max max-w-[200px] animate-in fade-in zoom-in-95 duration-200">
-          <div className="bg-slate-950 border border-slate-800 p-3 rounded-xl shadow-[0_0_20px_rgba(0,0,0,0.5)] backdrop-blur-md">
-            <h4 className="text-[10px] font-black uppercase tracking-widest text-cyan-400 mb-1">{title}</h4>
-            <p className="text-[11px] font-medium leading-normal text-slate-300 normal-case">{text}</p>
-          </div>
-          <div className="w-2 h-2 bg-slate-950 border-r border-b border-slate-800 rotate-45 mx-auto -mt-1.5"></div>
-        </div>
-      )}
-    </div>
-  );
+const TYPE_COLORS: Record<string, string> = {
+  normal: 'bg-gray-400', fire: 'bg-red-500', water: 'bg-blue-500',
+  electric: 'bg-yellow-400', grass: 'bg-green-500', ice: 'bg-cyan-400',
+  fighting: 'bg-orange-700', poison: 'bg-purple-500', ground: 'bg-amber-600',
+  flying: 'bg-indigo-400', psychic: 'bg-pink-500', bug: 'bg-lime-500',
+  rock: 'bg-stone-600', ghost: 'bg-violet-700', dragon: 'bg-indigo-700',
+  dark: 'bg-neutral-800', steel: 'bg-slate-400', fairy: 'bg-rose-400',
 };
 
 export const PokemonDetail: React.FC = () => {
-  const { getActiveTeam, activeMemberIndex } = useTeamStore();
-  const members = getActiveTeam().members;
-  const selectedMember = members[activeMemberIndex];
-  const pokemon = selectedMember?.pokemon;
-  const [abilityDesc, setAbilityDesc] = useState<Record<string, string>>({});
+  const { getActiveTeam, activeMemberIndex, setAbility } = useTeamStore();
+  const team = getActiveTeam();
+  const member = team.members[activeMemberIndex];
 
-  useEffect(() => {
-    if (pokemon) {
-      pokemon.abilities.forEach(a => {
-        if (!abilityDesc[a.ability.name]) {
-          pokemonApi.getAbilityDescription(a.ability.name).then(desc => {
-            setAbilityDesc(prev => ({ ...prev, [a.ability.name]: desc }));
-          });
-        }
-      });
-    }
-  }, [pokemon]);
-
-  if (!pokemon) {
+  if (!member || !member.pokemon) {
     return (
-      <div className="flex flex-col items-center justify-center h-full text-slate-500 animate-in fade-in duration-500">
-        <div className="w-16 h-16 border-2 border-dashed border-slate-800 rounded-full flex items-center justify-center mb-4">
-          <Fingerprint className="w-8 h-8 opacity-20" />
+      <div className="h-full min-h-[500px] flex flex-col items-center justify-center text-slate-200 gap-6 animate-in fade-in duration-500 italic">
+        <div className="w-28 h-28 rounded-[40px] border-4 border-slate-50 border-dashed animate-spin flex items-center justify-center">
+           <Star className="w-10 h-10 opacity-20" />
         </div>
-        <p className="text-sm font-medium">Select a slot to add a Pokémon</p>
+        <p className="text-sm font-black uppercase tracking-[0.4em] text-slate-100">Scanning Unit...</p>
       </div>
     );
   }
 
-  const coverage = getDefensiveCoverage(pokemon.types.map(t => t.type.name));
-  const x4Weak = Object.entries(coverage).filter(([_, mult]) => mult === 4);
-  const x2Weak = Object.entries(coverage).filter(([_, mult]) => mult === 2);
-  const x05Resist = Object.entries(coverage).filter(([_, mult]) => mult === 0.5);
-  const x025Resist = Object.entries(coverage).filter(([_, mult]) => mult === 0.25);
-  const immunities = Object.entries(coverage).filter(([_, mult]) => mult === 0);
+  const { pokemon, ability: currentAbilityName } = member;
 
   return (
-    <div className="animate-in fade-in slide-in-from-right-4 duration-500">
-      <div className="flex flex-col md:flex-row gap-8 items-start">
-        {/* Sprite & Identity */}
-        <div className="flex flex-col items-center gap-4 w-full md:w-auto">
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="flex flex-col md:flex-row gap-16">
+        {/* Left: Visuals & Types */}
+        <div className="flex flex-col items-center gap-10">
           <div className="relative group">
-            <div className="absolute inset-0 bg-cyan-500/20 blur-3xl group-hover:bg-cyan-500/30 transition-all rounded-full"></div>
+            <div className="absolute inset-0 bg-red-600/5 rounded-full blur-[100px] group-hover:bg-red-500/10 transition-all duration-1000"></div>
             <img 
               src={pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default} 
               alt={pokemon.name}
-              className="w-48 h-48 md:w-64 md:h-64 object-contain relative z-10 drop-shadow-2xl hover:scale-105 transition-transform"
+              className="w-56 h-56 md:w-72 md:h-72 object-contain relative z-10 drop-shadow-xl transform hover:scale-105 transition-transform duration-700"
             />
           </div>
-          <div className="text-center">
-            <h2 className="text-3xl font-black uppercase tracking-tighter text-white inline-flex items-center gap-3">
-              <span className="text-slate-600 text-xl">#{pokemon.id.toString().padStart(3, '0')}</span>
-              {pokemon.name.replace('-', ' ')}
-            </h2>
-            <div className="flex justify-center gap-2 mt-2">
-              {pokemon.types.map((t) => (
-                <Tooltip key={t.type.name} title={t.type.name} text={TYPE_DESCRIPTIONS[t.type.name]}>
-                  <span className={`px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest text-white shadow-lg ${TYPE_COLORS[t.type.name]}`}>
-                    {t.type.name}
-                  </span>
-                </Tooltip>
-              ))}
+          
+          <div className="flex gap-3">
+            {pokemon.types.map((t) => (
+              <span 
+                key={t.type.name}
+                className={twMerge(
+                  "px-6 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white shadow-md transition-transform hover:scale-110 cursor-default italic",
+                  TYPE_COLORS[t.type.name]
+                )}
+              >
+                {t.type.name}
+              </span>
+            ))}
+          </div>
+
+          <div className="w-full space-y-4 pt-6 text-center md:text-left">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 border-l-[6px] border-orange-500 pl-4 italic">Biological Traits</h3>
+            <div className="grid grid-cols-1 gap-3">
+              {pokemon.abilities.map((a) => {
+                const isSelected = currentAbilityName === a.ability.name;
+                return (
+                  <button
+                    key={a.ability.name}
+                    onClick={() => setAbility(activeMemberIndex, a.ability.name)}
+                    className={twMerge(
+                      "group flex items-center justify-between px-6 py-4 rounded-3xl border-2 transition-all text-sm",
+                      isSelected 
+                        ? "bg-orange-500/10 border-orange-600 shadow-md" 
+                        : "bg-slate-50 border-transparent hover:border-orange-600/30 hover:bg-white hover:shadow-sm"
+                    )}
+                  >
+                    <div className="flex flex-col items-start gap-1">
+                       <span className={twMerge(
+                         "font-black uppercase tracking-[0.05em] transition-colors italic",
+                         isSelected ? "text-orange-700" : "text-slate-500 group-hover:text-orange-600"
+                       )}>
+                         {a.ability.name.replace('-', ' ')}
+                       </span>
+                       {a.is_hidden && (
+                         <span className="text-[9px] font-black uppercase tracking-widest text-amber-600 italic">Rare Hidden Gene</span>
+                       )}
+                    </div>
+                    {isSelected && <div className="w-2.5 h-2.5 bg-orange-600 rounded-full animate-pulse shadow-[0_0_12px_rgba(249,115,22,0.8)]"></div>}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
 
-        {/* Stats & Nerd Info */}
-        <div className="flex-1 w-full space-y-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl">
-              <div className="flex items-center gap-2 mb-4 text-cyan-400">
-                <BarChart3 className="w-5 h-5" />
-                <span className="text-xs font-bold uppercase tracking-widest">Base Stats</span>
+        {/* Right: Info & Stats & TYPE CHART */}
+        <div className="flex-1 space-y-12">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-4 border-slate-950/5 pb-10">
+            <div>
+              <span className="text-base font-black text-red-600 italic tracking-[0.2em] mb-2 block uppercase opacity-40">#{pokemon.id.toString().padStart(4, '0')}</span>
+              <h2 className="text-6xl md:text-7xl font-black uppercase tracking-tighter leading-none italic text-orange-600 underline decoration-orange-600/5 underline-offset-10 decoration-8">{pokemon.name.replace('-', ' ')}</h2>
+            </div>
+            <div className="flex gap-8">
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] font-black uppercase text-slate-300">Height</span>
+                <span className="font-black text-slate-900 border-b-2 border-orange-600/10 px-2 italic">{pokemon.height / 10}m</span>
               </div>
-              <div className="space-y-3">
-                {pokemon.stats.map((s) => (
-                  <div key={s.stat.name}>
-                    <div className="flex justify-between text-[10px] uppercase font-bold text-slate-400 mb-1">
-                      <span>{s.stat.name.replace('special-', 'sp. ')}</span>
-                      <span className="text-slate-200">{s.base_stat}</span>
+              <div className="flex flex-col items-center">
+                <span className="text-[10px] font-black uppercase text-slate-300">Weight</span>
+                <span className="font-black text-slate-900 border-b-2 border-orange-600/10 px-2 italic">{pokemon.weight / 10}kg</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-16">
+            {/* Stats Column */}
+            <div className="space-y-12">
+               <div className="space-y-6">
+                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 border-l-[6px] border-orange-500 pl-4 italic">Power Matrices</h3>
+                 <div className="space-y-5">
+                   {pokemon.stats.map((s) => (
+                     <div key={s.stat.name} className="space-y-2">
+                       <div className="flex justify-between text-[10px] font-black uppercase tracking-widest">
+                         <span className="text-slate-400 group-hover:text-slate-600">{s.stat.name.replace('special-', 'Sp. ')}</span>
+                         <span className="text-orange-700 italic border-b border-orange-100">{s.base_stat}</span>
+                       </div>
+                       <div className="h-2.5 bg-slate-50 rounded-full overflow-hidden border border-slate-200/50 shadow-inner">
+                         <div 
+                           className={twMerge("h-full transition-all duration-1000 ease-out rounded-full shadow-sm", STAT_COLORS[s.stat.name])}
+                           style={{ width: `${(s.base_stat / 255) * 100}%` }}
+                         />
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               </div>
+
+               <div className="space-y-6">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300 border-l-[6px] border-orange-500 pl-4 italic">Performance Rating</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-[#FDFEFE] border-2 border-slate-50 p-4 rounded-3xl flex flex-col items-center justify-center gap-2 text-center group shadow-sm">
+                       <Heart className="w-5 h-5 text-rose-500 group-hover:scale-125 transition-transform" />
+                       <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Vitality Hub</span>
+                       <span className="font-black text-sm italic text-slate-900">{Math.floor(pokemon.stats[0].base_stat / 3)}</span>
                     </div>
-                    <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-cyan-500 rounded-full shadow-[0_0_8px_rgba(6,182,212,0.4)]"
-                        style={{ width: `${(s.base_stat / 255) * 100}%` }}
-                      ></div>
+                    <div className="bg-[#FDFEFE] border-2 border-slate-50 p-4 rounded-3xl flex flex-col items-center justify-center gap-2 text-center group shadow-sm">
+                       <Zap className="w-5 h-5 text-yellow-500 group-hover:scale-125 transition-transform" />
+                       <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Combat Tier</span>
+                       <span className="font-black text-sm italic text-slate-900">S-CLASS</span>
                     </div>
                   </div>
-                ))}
-              </div>
+               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl">
-                <div className="flex items-center gap-2 mb-3 text-amber-400">
-                  <Zap className="w-5 h-5" />
-                  <Tooltip title="Abilities" text={TYPE_DESCRIPTIONS.ability}>
-                    <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-1 group">
-                      Abilities <Info className="w-3 h-3 text-slate-600 group-hover:text-amber-400" />
-                    </span>
-                  </Tooltip>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {pokemon.abilities.map((a) => {
-                    const isSelected = selectedMember.ability === a.ability.name;
-                    return (
-                      <Tooltip key={a.ability.name} title={a.ability.name.replace('-', ' ')} text={abilityDesc[a.ability.name] || "Loading effect..."}>
-                        <button
-                          onClick={() => useTeamStore.getState().setAbility(activeMemberIndex, a.ability.name)}
-                          className={twMerge(
-                            "group relative flex flex-col items-start px-3 py-2 rounded-xl text-xs font-medium transition-all border text-left min-w-[100px]",
-                            isSelected 
-                              ? "bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]" 
-                              : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:bg-slate-800/80"
-                          )}
-                        >
-                          <span className="capitalize">{a.ability.name.replace('-', ' ')}</span>
-                          {a.is_hidden && (
-                            <span className="text-[7px] uppercase font-black tracking-widest text-amber-500/80 mt-0.5">Hidden Ability</span>
-                          )}
-                          {isSelected && (
-                            <div className="absolute top-1 right-2">
-                              <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
-                            </div>
-                          )}
-                        </button>
-                      </Tooltip>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <div className="bg-slate-900/60 border border-slate-800 p-4 rounded-2xl">
-                <div className="flex items-center gap-2 mb-4 text-purple-400">
-                  <Swords className="w-5 h-5" />
-                  <Tooltip title="Type Chart" text={TYPE_DESCRIPTIONS.typechart}>
-                    <span className="text-xs font-bold uppercase tracking-widest flex items-center gap-1 group">
-                      Type Chart <Info className="w-3 h-3 text-slate-600 group-hover:text-purple-400" />
-                    </span>
-                  </Tooltip>
-                </div>
-                
-                <div className="space-y-4">
-                  {(x4Weak.length > 0 || x2Weak.length > 0) && (
-                    <div className="space-y-3">
-                      <Tooltip title="Weakness" text={TYPE_DESCRIPTIONS.weakness}>
-                        <span className="text-[10px] uppercase font-bold text-red-500 flex items-center gap-1 group mb-2">
-                          Weaknesses <Info className="w-3 h-3 text-slate-600 group-hover:text-red-500" />
-                        </span>
-                      </Tooltip>
-                      
-                      <div className="space-y-2">
-                        {x4Weak.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pl-2 border-l border-red-500/10">
-                            <span className="text-[8px] uppercase font-black text-red-600 w-full mb-1">x4 Damage</span>
-                            {x4Weak.map(([type]) => (
-                              <Tooltip key={type} title={type} text={TYPE_DESCRIPTIONS[type]}>
-                                <span className="bg-red-500/15 border border-red-500/30 text-red-300 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
-                                  {type}
-                                </span>
-                              </Tooltip>
-                            ))}
-                          </div>
-                        )}
-                        {x2Weak.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pl-2 border-l border-red-500/10">
-                            <span className="text-[8px] uppercase font-black text-red-400 w-full mb-1">x2 Damage</span>
-                            {x2Weak.map(([type]) => (
-                              <Tooltip key={type} title={type} text={TYPE_DESCRIPTIONS[type]}>
-                                <span className="bg-red-500/10 border border-red-500/20 text-red-300 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
-                                  {type}
-                                </span>
-                              </Tooltip>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {(x05Resist.length > 0 || x025Resist.length > 0) && (
-                    <div className="space-y-3">
-                      <Tooltip title="Resistance" text={TYPE_DESCRIPTIONS.resistance}>
-                        <span className="text-[10px] uppercase font-bold text-green-500 flex items-center gap-1 group mb-2">
-                          Resistances <Info className="w-3 h-3 text-slate-600 group-hover:text-green-500" />
-                        </span>
-                      </Tooltip>
-
-                      <div className="space-y-2">
-                        {x05Resist.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pl-2 border-l border-green-500/10">
-                            <span className="text-[8px] uppercase font-black text-green-400 w-full mb-1">x0.5 Damage</span>
-                            {x05Resist.map(([type]) => (
-                              <Tooltip key={type} title={type} text={TYPE_DESCRIPTIONS[type]}>
-                                <span className="bg-green-500/10 border border-green-500/20 text-green-300 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
-                                  {type}
-                                </span>
-                              </Tooltip>
-                            ))}
-                          </div>
-                        )}
-                        {x025Resist.length > 0 && (
-                          <div className="flex flex-wrap gap-1.5 pl-2 border-l border-green-500/10">
-                            <span className="text-[8px] uppercase font-black text-green-600 w-full mb-1">x0.25 Damage</span>
-                            {x025Resist.map(([type]) => (
-                              <Tooltip key={type} title={type} text={TYPE_DESCRIPTIONS[type]}>
-                                <span className="bg-green-500/15 border border-green-500/30 text-green-300 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
-                                  {type}
-                                </span>
-                              </Tooltip>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {immunities.length > 0 && (
-                    <div className="space-y-2">
-                      <Tooltip title="Immunity" text={TYPE_DESCRIPTIONS.immunity}>
-                        <span className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1 group mb-2">
-                          Immunities <Info className="w-3 h-3 text-slate-600 group-hover:text-slate-400" />
-                        </span>
-                      </Tooltip>
-                      <div className="flex flex-wrap gap-1.5 pl-2 border-l border-slate-800">
-                        {immunities.map(([type]) => (
-                          <Tooltip key={type} title={type} text={TYPE_DESCRIPTIONS[type]}>
-                            <span className="bg-slate-800/80 border border-slate-700 text-slate-300 px-2 py-0.5 rounded text-[9px] font-bold uppercase">
-                              {type}
-                            </span>
-                          </Tooltip>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
+            {/* Type Chart Column */}
+            <div className="xl:border-l-4 xl:border-slate-50 xl:pl-12">
+               <TypeChart types={pokemon.types.map(t => t.type.name)} />
             </div>
+          </div>
+
+          <div className="mt-10 p-8 bg-orange-500/5 border-2 border-orange-500/20 rounded-[40px] relative overflow-hidden group hover:bg-orange-500/10 transition-colors">
+            <div className="flex gap-5 relative z-10 items-center">
+              <Info className="w-7 h-7 text-orange-600 flex-shrink-0" />
+              <p className="text-[12px] text-orange-900/60 leading-relaxed font-bold italic">
+                STRATEGY NOTE: This Pokémon's resistances are calculated including its dual-type synergies. 
+                Hover over results for tactical info.
+              </p>
+            </div>
+            <Star className="absolute -bottom-10 -right-10 w-32 h-32 text-orange-600 opacity-10 rotate-12 transition-transform group-hover:rotate-90 duration-1000" />
           </div>
         </div>
       </div>

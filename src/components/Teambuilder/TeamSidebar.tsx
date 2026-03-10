@@ -8,9 +8,9 @@ export const TeamSidebar: React.FC = () => {
   const members = getActiveTeam().members;
 
   return (
-    <div className="flex flex-col gap-4">
-      <h2 className="text-lg font-bold text-slate-400 uppercase tracking-widest px-2">Your Team</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-4">
+    <div className="flex flex-col gap-5">
+      <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] px-3 italic">Squad Members</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-5">
         {members.map((member, index) => {
           const isActive = index === activeMemberIndex;
           
@@ -19,16 +19,16 @@ export const TeamSidebar: React.FC = () => {
               key={index}
               onClick={() => setActiveIndex(index)}
               className={twMerge(
-                "group relative bg-slate-900/40 border-2 rounded-2xl p-4 cursor-pointer transition-all min-h-[100px] flex flex-col items-center justify-center overflow-hidden",
-                isActive ? "border-cyan-500 bg-slate-900 shadow-[0_0_20px_rgba(6,182,212,0.15)] scale-[1.02]" : "border-slate-800 hover:border-slate-700 hover:bg-slate-900/60"
+                "group relative bg-white border-2 rounded-[32px] p-5 cursor-pointer transition-all min-h-[110px] flex flex-col items-center justify-center overflow-hidden shadow-sm",
+                isActive ? "border-orange-600 bg-orange-500 text-white shadow-xl scale-[1.05]" : "border-slate-100 hover:border-red-600/30 hover:bg-white hover:shadow-md"
               )}
             >
-              <div className="absolute top-2 left-2 z-10">
+              <div className="absolute top-3 left-4 z-10">
                 <span className={twMerge(
-                  "text-[9px] font-black uppercase tracking-tighter transition-colors",
-                  isActive ? "text-cyan-500" : "text-slate-600 group-hover:text-slate-500"
+                  "text-[10px] font-black uppercase tracking-tight italic transition-colors",
+                  isActive ? "text-red-600" : "text-slate-300 group-hover:text-red-500"
                 )}>
-                  #{index + 1}
+                  SLOT {index + 1}
                 </span>
               </div>
 
@@ -39,39 +39,50 @@ export const TeamSidebar: React.FC = () => {
                       e.stopPropagation();
                       removeMember(index);
                     }}
-                    className="absolute top-2 right-2 p-1.5 bg-slate-900/90 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-20 border border-slate-700 hover:border-red-500/50"
+                    className={twMerge(
+                      "absolute top-3 right-3 p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all z-20 border-2",
+                      isActive 
+                        ? "bg-red-600/10 border-red-600/20 text-red-500 hover:bg-red-600 hover:text-white"
+                        : "bg-slate-50 border-slate-100 text-slate-400 hover:text-red-500 hover:border-red-500/30"
+                    )}
                   >
                     <X className="w-4 h-4" />
                   </button>
                   <div className="relative">
                     <div className={twMerge(
-                      "absolute inset-0 blur-xl opacity-20 transition-opacity",
-                      isActive ? "bg-cyan-500 opacity-30" : "bg-white opacity-10"
+                      "absolute inset-0 blur-2xl opacity-10 transition-opacity",
+                      isActive ? "bg-red-600 opacity-40" : "bg-red-600 opacity-0 group-hover:opacity-20"
                     )}></div>
                     <img 
                       src={member.pokemon.sprites.other?.showdown?.front_default || member.pokemon.sprites.front_default} 
                       alt={member.pokemon.name}
-                      className="w-14 h-14 object-contain relative z-10 drop-shadow-[0_0_8px_rgba(0,0,0,0.5)]"
+                      className="w-16 h-16 object-contain relative z-10 drop-shadow-lg scale-110 group-hover:rotate-12 transition-transform duration-500"
                     />
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-300 mt-2 truncate w-full text-center">
+                  <span className={twMerge(
+                    "text-[11px] font-black uppercase tracking-tighter mt-3 truncate w-full text-center italic",
+                    isActive ? "text-white" : "text-slate-900"
+                  )}>
                     {member.pokemon.name.replace('-', ' ')}
                   </span>
                 </>
               ) : (
-                <div className="flex flex-col items-center gap-2">
+                <div className="flex flex-col items-center gap-3">
                   <div className={twMerge(
-                    "w-8 h-8 rounded-xl border border-dashed flex items-center justify-center transition-colors",
-                    isActive ? "border-cyan-500/50 bg-cyan-500/5" : "border-slate-800 bg-slate-950/20"
+                    "w-10 h-10 rounded-2xl border-4 border-dashed flex items-center justify-center transition-all",
+                    isActive ? "border-red-600/50 bg-red-600/5 rotate-45" : "border-slate-100 bg-slate-50 group-hover:bg-red-50 group-hover:border-red-100"
                   )}>
-                    <Plus className={twMerge("w-4 h-4", isActive ? "text-cyan-500" : "text-slate-700")} />
+                    <Plus className={twMerge("w-5 h-5", isActive ? "text-red-600 -rotate-45" : "text-slate-200 group-hover:text-red-600")} />
                   </div>
-                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-700">Recruit</span>
+                  <span className={twMerge(
+                    "text-[10px] font-black uppercase tracking-[0.2em] italic",
+                    isActive ? "text-red-600 opacity-40" : "text-slate-200 group-hover:text-red-300"
+                  )}>Recruit</span>
                 </div>
               )}
               
               {isActive && (
-                <div className="absolute bottom-0 left-0 right-0 h-1 bg-cyan-500 shadow-[0_0_10px_rgba(6,182,212,0.8)]"></div>
+                <div className="absolute right-0 top-0 bottom-0 w-2 bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>
               )}
             </div>
           );

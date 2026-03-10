@@ -24,6 +24,19 @@ export const pokemonApi = {
   },
 
   /**
+   * Fetch a paged list of Pokemon with their full details
+   */
+  async getPokedexList(offset: number, limit: number): Promise<Pokemon[]> {
+    const listRes = await fetch(`${BASE_URL}/pokemon?offset=${offset}&limit=${limit}`);
+    const listData = await listRes.json();
+    
+    const details = await Promise.all(
+      listData.results.map((p: { name: string }) => this.getPokemon(p.name))
+    );
+    return details;
+  },
+
+  /**
    * Fetch ability effect description
    */
   async getAbilityDescription(name: string): Promise<string> {
