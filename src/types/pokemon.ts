@@ -33,7 +33,8 @@ export interface Pokemon {
   abilities: {
     ability: {
       name: string;
-    }
+    };
+    is_hidden: boolean;
   }[];
 }
 

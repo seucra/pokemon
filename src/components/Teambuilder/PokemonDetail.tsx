@@ -4,6 +4,7 @@ import { Zap, BarChart3, Fingerprint, Swords, Info } from 'lucide-react';
 import type { PokemonType } from '../../types/pokemon';
 import { getDefensiveCoverage, TYPE_DESCRIPTIONS } from '../../logic/typeCalc';
 import { pokemonApi } from '../../api/pokemonApi';
+import { twMerge } from 'tailwind-merge';
 
 const TYPE_COLORS: Record<PokemonType, string> = {
   normal: 'bg-gray-400', fire: 'bg-orange-500', water: 'bg-blue-500',
@@ -141,13 +142,32 @@ export const PokemonDetail: React.FC = () => {
                   </Tooltip>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {pokemon.abilities.map((a) => (
-                    <Tooltip key={a.ability.name} title={a.ability.name.replace('-', ' ')} text={abilityDesc[a.ability.name] || "Loading effect..."}>
-                      <span className="bg-slate-800 px-3 py-1.5 rounded-lg text-xs font-medium text-slate-300 capitalize border border-slate-700 hover:border-amber-500/50 hover:bg-slate-800/80 transition-all">
-                        {a.ability.name.replace('-', ' ')}
-                      </span>
-                    </Tooltip>
-                  ))}
+                  {pokemon.abilities.map((a) => {
+                    const isSelected = selectedMember.ability === a.ability.name;
+                    return (
+                      <Tooltip key={a.ability.name} title={a.ability.name.replace('-', ' ')} text={abilityDesc[a.ability.name] || "Loading effect..."}>
+                        <button
+                          onClick={() => useTeamStore.getState().setAbility(activeMemberIndex, a.ability.name)}
+                          className={twMerge(
+                            "group relative flex flex-col items-start px-3 py-2 rounded-xl text-xs font-medium transition-all border text-left min-w-[100px]",
+                            isSelected 
+                              ? "bg-cyan-500/10 border-cyan-500 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.1)]" 
+                              : "bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-600 hover:bg-slate-800/80"
+                          )}
+                        >
+                          <span className="capitalize">{a.ability.name.replace('-', ' ')}</span>
+                          {a.is_hidden && (
+                            <span className="text-[7px] uppercase font-black tracking-widest text-amber-500/80 mt-0.5">Hidden Ability</span>
+                          )}
+                          {isSelected && (
+                            <div className="absolute top-1 right-2">
+                              <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
+                            </div>
+                          )}
+                        </button>
+                      </Tooltip>
+                    );
+                  })}
                 </div>
               </div>
 

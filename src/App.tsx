@@ -7,7 +7,8 @@ import { TeamAnalysis } from './components/Teambuilder/TeamAnalysis'
 import { useTeamStore } from './store/useTeamStore'
 
 function App() {
-  const activeIndex = useTeamStore(state => state.activeMemberIndex);
+  const { getActiveTeam, activeMemberIndex } = useTeamStore();
+  const activeTeam = getActiveTeam();
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-cyan-500/30 overflow-x-hidden">
@@ -15,8 +16,10 @@ function App() {
       <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center border-2 border-white/20 shadow-[0_0_10px_rgba(220,38,38,0.5)]">
-               <div className="w-3 h-3 bg-white rounded-full"></div>
+            <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center border-2 border-slate-900 relative overflow-hidden shadow-[0_0_15px_rgba(220,38,38,0.4)]">
+               <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-white"></div>
+               <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-slate-900 -translate-y-1/2"></div>
+               <div className="w-2.5 h-2.5 bg-white rounded-full border border-slate-900 relative z-10"></div>
             </div>
             <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-cyan-400 to-blue-600 bg-clip-text text-transparent">
               PokemonCraze
@@ -43,7 +46,9 @@ function App() {
           <ChevronRight className="w-3 h-3" />
           <span className="text-cyan-500">Team Builder</span>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-slate-400">Slot {activeIndex + 1}</span>
+          <span className="text-slate-400 truncate max-w-[150px]">{activeTeam.name}</span>
+          <ChevronRight className="w-3 h-3" />
+          <span className="text-slate-400">Slot {activeMemberIndex + 1}</span>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
@@ -63,7 +68,7 @@ function App() {
               <div className="relative z-10 flex flex-col items-center">
                 <div className="mb-8 text-center">
                   <h2 className="text-3xl font-black mb-2 uppercase tracking-tight">Recruit a Pokémon</h2>
-                  <p className="text-slate-500 text-sm">Select slot {activeIndex + 1} and search for your next team member.</p>
+                  <p className="text-slate-500 text-sm">Select slot {activeMemberIndex + 1} and search for your next team member.</p>
                 </div>
                 <PokemonSearch />
               </div>

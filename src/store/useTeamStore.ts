@@ -7,6 +7,7 @@ interface TeamActions {
   removeMember: (index: number) => void;
   updateMember: (index: number, updates: Partial<TeamMember>) => void;
   setActiveIndex: (index: number) => void;
+  setAbility: (index: number, name: string) => void;
   addTeam: (name?: string) => void;
   removeTeam: (id: string) => void;
   setActiveTeamId: (id: string) => void;
@@ -72,14 +73,33 @@ export const useTeamStore = create<TeamStore>()(
         teams: state.teams.map((t) => t.id === id ? { ...t, name } : t),
       })),
 
+      setActiveIndex: (index) => set({ activeMemberIndex: index }),
+
+      setAbility: (index, ability) => set((state) => {
+        const newTeams = state.teams.map((team) => {
+          if (team.id === state.activeTeamId) {
+            const newMembers = [...team.members];
+            if (newMembers[index]) {
+              newMembers[index] = { ...newMembers[index], ability };
+            }
+            return { ...team, members: newMembers };
+          }
+          return team;
+        });
+        return { teams: newTeams };
+      }),
+
       addMember: (index, pokemon) => set((state) => {
         const newTeams = state.teams.map((team) => {
           if (team.id === state.activeTeamId) {
             const newMembers = [...team.members];
+            // Prefer non-hidden ability for default
+            const defaultAbility = pokemon.abilities.find(a => !a.is_hidden)?.ability.name || pokemon.abilities[0]?.ability.name || '';
+            
             newMembers[index] = { 
               ...initialMember, 
               pokemon,
-              ability: pokemon.abilities[0]?.ability.name || '',
+              ability: defaultAbility,
             };
             return { ...team, members: newMembers };
           }
@@ -113,8 +133,6 @@ export const useTeamStore = create<TeamStore>()(
         });
         return { teams: newTeams };
       }),
-
-      setActiveIndex: (index) => set({ activeMemberIndex: index }),
     }),
     {
       name: 'pokemon-craze-storage',
