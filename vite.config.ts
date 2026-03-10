@@ -8,5 +8,5 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
-  base: './', // Ensures assets are loaded correctly on relative paths (e.g., GitHub Pages)
+  base: '/pokemon/', // Correctly set for GitHub Pages sub-directory hosting
 })
