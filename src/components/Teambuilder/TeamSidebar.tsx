@@ -30,9 +30,9 @@ export const TeamSidebar: React.FC = () => {
                       e.stopPropagation();
                       removeMember(index);
                     }}
-                    className="absolute top-1 right-1 p-1 bg-slate-950/60 text-slate-500 hover:text-red-400 rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                    className="absolute top-2 right-2 p-1.5 bg-slate-900/90 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-10 border border-slate-700 hover:border-red-500/50"
                   >
-                    <X className="w-3 xh-3" />
+                    <X className="w-4 h-4" />
                   </button>
                   <img 
                     src={member.pokemon.sprites.other?.showdown?.front_default || member.pokemon.sprites.front_default} 

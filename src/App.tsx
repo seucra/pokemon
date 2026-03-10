@@ -52,7 +52,7 @@ function App() {
 
           {/* Main Content - Search & Detail */}
           <section className="flex-1 space-y-8">
-            <div className="bg-slate-900/10 border border-slate-800/50 p-6 rounded-3xl backdrop-blur-sm shadow-inner overflow-hidden relative">
+            <div className="bg-slate-900/10 border border-slate-800/50 p-6 rounded-3xl backdrop-blur-sm shadow-inner relative">
               <div className="absolute top-0 right-0 p-8 opacity-5">
                 <Shield className="w-64 h-64 -mr-16 -mt-16" />
               </div>
