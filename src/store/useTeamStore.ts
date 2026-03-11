@@ -12,9 +12,11 @@ interface TeamActions {
   removeTeam: (id: string) => void;
   setActiveTeamId: (id: string) => void;
   renameTeam: (id: string, name: string) => void;
+  setTheme: (theme: 'gba' | 'cinnabar') => void;
 }
 
 interface TeamStore extends TeamState, TeamActions {
+  theme: 'gba' | 'cinnabar';
   // Helper to get active team for UI
   getActiveTeam: () => Team;
 }
@@ -43,6 +45,7 @@ export const useTeamStore = create<TeamStore>()(
       teams: [defaultTeam],
       activeTeamId: defaultTeam.id,
       activeMemberIndex: 0,
+      theme: 'cinnabar',
 
       getActiveTeam: () => {
         const state = get();
@@ -133,6 +136,8 @@ export const useTeamStore = create<TeamStore>()(
         });
         return { teams: newTeams };
       }),
+
+      setTheme: (theme) => set({ theme }),
     }),
     {
       name: 'pokemon-craze-storage',

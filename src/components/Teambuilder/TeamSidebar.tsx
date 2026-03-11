@@ -8,9 +8,9 @@ export const TeamSidebar: React.FC = () => {
   const members = getActiveTeam().members;
 
   return (
-    <div className="flex flex-col gap-5">
-      <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] px-3 italic">Squad Members</h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-5">
+    <div className="flex flex-col gap-4">
+      <h2 className="text-[10px] font-extrabold text-[var(--text-muted)] uppercase tracking-[0.2em] px-2 italic">Squad Members</h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-1 gap-3">
         {members.map((member, index) => {
           const isActive = index === activeMemberIndex;
           
@@ -19,14 +19,14 @@ export const TeamSidebar: React.FC = () => {
               key={index}
               onClick={() => setActiveIndex(index)}
               className={twMerge(
-                "group relative bg-white border-2 rounded-[32px] p-5 cursor-pointer transition-all min-h-[110px] flex flex-col items-center justify-center overflow-hidden shadow-sm",
-                isActive ? "border-orange-600 bg-orange-500 text-white shadow-xl scale-[1.05]" : "border-slate-100 hover:border-red-600/30 hover:bg-white hover:shadow-md"
+                "group relative bg-[var(--bg-panel)] border rounded-2xl p-4 cursor-pointer transition-all min-h-[100px] flex flex-col items-center justify-center overflow-hidden",
+                isActive ? "border-[var(--accent-primary)] bg-[var(--accent-primary)]/10 shadow-lg scale-[1.03]" : "border-[var(--border-subtle)] hover:border-[var(--accent-primary)]/40 hover:bg-[var(--bg-card)]"
               )}
             >
-              <div className="absolute top-3 left-4 z-10">
+              <div className="absolute top-2.5 left-3 z-10">
                 <span className={twMerge(
-                  "text-[10px] font-black uppercase tracking-tight italic transition-colors",
-                  isActive ? "text-red-600" : "text-slate-300 group-hover:text-red-500"
+                  "text-[9px] font-extrabold uppercase tracking-tight transition-colors",
+                  isActive ? "text-[var(--accent-primary)]" : "text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]"
                 )}>
                   SLOT {index + 1}
                 </span>
@@ -40,49 +40,49 @@ export const TeamSidebar: React.FC = () => {
                       removeMember(index);
                     }}
                     className={twMerge(
-                      "absolute top-3 right-3 p-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all z-20 border-2",
+                      "absolute top-2.5 right-2.5 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all z-20 border",
                       isActive 
-                        ? "bg-red-600/10 border-red-600/20 text-red-500 hover:bg-red-600 hover:text-white"
-                        : "bg-slate-50 border-slate-100 text-slate-400 hover:text-red-500 hover:border-red-500/30"
+                        ? "bg-[var(--accent-primary)]/10 border-[var(--accent-primary)]/20 text-[var(--accent-primary)] hover:bg-[var(--accent-primary)] hover:text-white"
+                        : "bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-muted)] hover:text-red-500 hover:border-red-500/30"
                     )}
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-3.5 h-3.5" />
                   </button>
                   <div className="relative">
                     <div className={twMerge(
-                      "absolute inset-0 blur-2xl opacity-10 transition-opacity",
-                      isActive ? "bg-red-600 opacity-40" : "bg-red-600 opacity-0 group-hover:opacity-20"
+                      "absolute inset-0 blur-2xl opacity-0 transition-opacity",
+                      isActive ? "bg-[var(--accent-primary)] opacity-30" : "bg-[var(--accent-primary)] group-hover:opacity-10"
                     )}></div>
                     <img 
                       src={member.pokemon.sprites.other?.showdown?.front_default || member.pokemon.sprites.front_default} 
                       alt={member.pokemon.name}
-                      className="w-16 h-16 object-contain relative z-10 drop-shadow-lg scale-110 group-hover:rotate-12 transition-transform duration-500"
+                      className="w-14 h-14 object-contain relative z-10 drop-shadow-lg group-hover:rotate-6 transition-transform duration-500"
                     />
                   </div>
                   <span className={twMerge(
-                    "text-[11px] font-black uppercase tracking-tighter mt-3 truncate w-full text-center italic",
-                    isActive ? "text-white" : "text-slate-900"
+                    "text-[10px] font-extrabold uppercase tracking-tight mt-2 truncate w-full text-center",
+                    isActive ? "text-[var(--text-primary)]" : "text-[var(--text-secondary)]"
                   )}>
                     {member.pokemon.name.replace('-', ' ')}
                   </span>
                 </>
               ) : (
-                <div className="flex flex-col items-center gap-3">
+                <div className="flex flex-col items-center gap-2">
                   <div className={twMerge(
-                    "w-10 h-10 rounded-2xl border-4 border-dashed flex items-center justify-center transition-all",
-                    isActive ? "border-red-600/50 bg-red-600/5 rotate-45" : "border-slate-100 bg-slate-50 group-hover:bg-red-50 group-hover:border-red-100"
+                    "w-9 h-9 rounded-xl border-2 border-dashed flex items-center justify-center transition-all",
+                    isActive ? "border-[var(--accent-primary)]/40 bg-[var(--accent-primary)]/5" : "border-[var(--border-subtle)] bg-[var(--bg-card)] group-hover:border-[var(--accent-primary)]/30"
                   )}>
-                    <Plus className={twMerge("w-5 h-5", isActive ? "text-red-600 -rotate-45" : "text-slate-200 group-hover:text-red-600")} />
+                    <Plus className={twMerge("w-4 h-4", isActive ? "text-[var(--accent-primary)]" : "text-[var(--text-muted)] group-hover:text-[var(--accent-primary)]/60")} />
                   </div>
                   <span className={twMerge(
-                    "text-[10px] font-black uppercase tracking-[0.2em] italic",
-                    isActive ? "text-red-600 opacity-40" : "text-slate-200 group-hover:text-red-300"
+                    "text-[9px] font-extrabold uppercase tracking-[0.15em]",
+                    isActive ? "text-[var(--accent-primary)]/50" : "text-[var(--text-muted)] group-hover:text-[var(--text-secondary)]"
                   )}>Recruit</span>
                 </div>
               )}
               
               {isActive && (
-                <div className="absolute right-0 top-0 bottom-0 w-2 bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.5)]"></div>
+                <div className="absolute right-0 top-0 bottom-0 w-1 bg-[var(--accent-primary)] shadow-[0_0_12px_var(--border-glow)]"></div>
               )}
             </div>
           );

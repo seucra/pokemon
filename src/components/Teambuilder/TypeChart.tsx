@@ -41,12 +41,12 @@ export const TypeChart: React.FC<TypeChartProps> = ({ types }) => {
     if (items.length === 0 && title !== "Weaknesses") return null;
 
     return (
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div className="group/title relative inline-block">
-          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 border-l-4 border-orange-500 pl-3 cursor-help transition-colors hover:text-orange-600">
+          <h4 className="text-[10px] font-extrabold uppercase tracking-[0.15em] text-[var(--text-muted)] border-l-3 border-[var(--accent-primary)] pl-3 cursor-help transition-colors hover:text-[var(--text-primary)]">
             {title}
           </h4>
-          <div className="absolute bottom-full left-0 mb-2 w-48 p-3 bg-slate-950 text-white text-[10px] uppercase font-bold tracking-widest rounded-xl opacity-0 translate-y-2 pointer-events-none group-hover/title:opacity-100 group-hover/title:translate-y-0 transition-all z-50 border border-orange-500/30 shadow-2xl">
+          <div className="absolute bottom-full left-0 mb-2 w-48 p-3 bg-[var(--bg-card)] text-[var(--text-primary)] text-[9px] uppercase font-bold tracking-widest rounded-xl opacity-0 translate-y-2 pointer-events-none group-hover/title:opacity-100 group-hover/title:translate-y-0 transition-all z-50 border border-[var(--border-subtle)] shadow-2xl">
             {TYPE_DESCRIPTIONS[descKey]}
           </div>
         </div>
@@ -55,39 +55,39 @@ export const TypeChart: React.FC<TypeChartProps> = ({ types }) => {
           {items.map(([type, mult]) => (
             <div key={type} className="group/type relative">
               <div className={twMerge(
-                "px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2 shadow-sm transition-transform hover:scale-110",
+                "px-3 py-1.5 rounded-xl border border-[var(--border-subtle)] flex items-center gap-2 shadow-sm transition-transform hover:scale-110",
                 TYPE_COLORS[type]
               )}>
-                <span className="text-[9px] font-black uppercase text-white tracking-widest">{type}</span>
+                <span className="text-[9px] font-extrabold uppercase text-white tracking-widest">{type}</span>
                 {mult !== 1 && (
-                  <span className="text-[9px] font-black text-white/60 bg-black/20 px-1.5 rounded-md italic">
+                  <span className="text-[9px] font-extrabold text-white/60 bg-black/20 px-1.5 rounded-md">
                     x{mult}
                   </span>
                 )}
               </div>
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 p-2 bg-slate-950 text-white text-[9px] uppercase font-bold tracking-tight rounded-lg opacity-0 translate-y-1 pointer-events-none group-hover/type:opacity-100 group-hover/type:translate-y-0 transition-all z-50 border border-white/10 text-center">
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 p-2 bg-[var(--bg-card)] text-[var(--text-primary)] text-[9px] uppercase font-bold tracking-tight rounded-lg opacity-0 translate-y-1 pointer-events-none group-hover/type:opacity-100 group-hover/type:translate-y-0 transition-all z-50 border border-[var(--border-subtle)] text-center">
                 {TYPE_DESCRIPTIONS[type]}
               </div>
             </div>
           ))}
-          {items.length === 0 && <span className="text-[10px] font-bold text-slate-200 uppercase tracking-widest italic opacity-50">None</span>}
+          {items.length === 0 && <span className="text-[10px] font-bold text-[var(--text-muted)] uppercase tracking-widest opacity-30">None Identified</span>}
         </div>
       </div>
     );
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    <div className="space-y-6 animate-in fade-in duration-500">
       <div className="group/main relative inline-block">
-        <h3 className="text-sm font-black uppercase tracking-[0.3em] text-slate-800 italic border-b-4 border-orange-500 pb-2 cursor-help">
+        <h3 className="text-[11px] font-extrabold uppercase tracking-[0.2em] text-[var(--text-secondary)] border-b-2 border-[var(--accent-primary)]/40 pb-2 cursor-help">
           Type Chart Analysis
         </h3>
-        <div className="absolute bottom-full left-0 mb-4 w-64 p-4 bg-slate-950 text-white text-[11px] uppercase font-black tracking-widest rounded-2xl opacity-0 translate-y-4 pointer-events-none group-hover/main:opacity-100 group-hover/main:translate-y-0 transition-all z-50 border-2 border-orange-500/50 shadow-2xl leading-relaxed">
+        <div className="absolute bottom-full left-0 mb-3 w-56 p-3 bg-[var(--bg-card)] text-[var(--text-primary)] text-[10px] uppercase font-bold tracking-widest rounded-xl opacity-0 translate-y-4 pointer-events-none group-hover/main:opacity-100 group-hover/main:translate-y-0 transition-all z-50 border border-[var(--border-subtle)] shadow-2xl leading-relaxed">
            {TYPE_DESCRIPTIONS.typechart}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-8">
+      <div className="grid grid-cols-1 gap-6">
         <Group title="Weaknesses" items={weaknesses as any} descKey="weakness" />
         <Group title="Resistances" items={resistances as any} descKey="resistance" />
         <Group title="Immunities" items={immunities as any} descKey="immunity" />

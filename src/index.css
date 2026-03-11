@@ -1,1 +1,175 @@
+/* ===== Google Font Import ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
 @import "tailwindcss";
+
+/* ===== Base Theme Variables ===== */
+:root {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Shared Defaults */
+  --type-normal: #A8A77A; --type-fire: #EE8130; --type-water: #6390F0;
+  --type-electric: #F7D02C; --type-grass: #7AC74C; --type-ice: #96D9D6;
+  --type-fighting: #C22E28; --type-poison: #A33EA1; --type-ground: #E2BF65;
+  --type-flying: #A98FF3; --type-psychic: #F95587; --type-bug: #A6B91A;
+  --type-rock: #B6A136; --type-ghost: #735797; --type-dragon: #6F35FC;
+  --type-dark: #705746; --type-steel: #B7B7CE; --type-fairy: #D685AD;
+}
+
+/* 2. FireRed & LeafGreen (GBA Era) */
+[data-theme='gba'] {
+  --bg-main: #FDFEFE;
+  --bg-panel: #F2F4F7;
+  --bg-card: #FFFFFF;
+  --bg-nav: rgba(255, 255, 255, 0.85);
+  
+  --text-primary: #1A1A1A;
+  --text-secondary: #6B7280;
+  --text-muted: #9CA3AF;
+  
+  --accent-primary: #E3350D; /* Poke Red */
+  --accent-secondary: #31A7D7; /* Water Blue */
+  --accent-gold: #F1C40F;
+  
+  --border-subtle: rgba(0, 0, 0, 0.08);
+  --border-glow: rgba(227, 53, 13, 0.2);
+  
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* 6. Cinnabar Flare (Modern Creative) */
+[data-theme='cinnabar'] {
+  --bg-main: #1A1A1D;
+  --bg-panel: #25252B;
+  --bg-card: #2D2D34;
+  --bg-nav: rgba(26, 26, 29, 0.85);
+  
+  --text-primary: #FFFFFF;
+  --text-secondary: #D1D5DB;
+  --text-muted: #6B7280;
+  
+  --accent-primary: #E63946; /* Imperial Red */
+  --accent-secondary: #2A9D8F; /* Teal */
+  --accent-warn: #F4A261; /* Sandy Orange */
+  --accent-alt: #E9C46A; /* Saffron Yellow */
+  
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-glow: rgba(230, 57, 70, 0.3);
+  
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+}
+
+/* ===== Global Utility Application ===== */
+body {
+  background-color: var(--bg-main);
+  color: var(--text-primary);
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+
+/* ===== Smooth Selection ===== */
+::selection {
+  background: var(--accent-primary);
+  color: white;
+}
+
+/* ===== Custom Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-main);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--text-muted);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-primary);
+}
+
+/* ===== Animations ===== */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(3deg); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes pokeball-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px var(--border-glow), 0 0 60px rgba(220,38,38,0.05); }
+  50% { box-shadow: 0 0 40px var(--border-glow), 0 0 90px rgba(220,38,38,0.15); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes ring-fill {
+  from { stroke-dashoffset: var(--ring-circumference, 282.7); }
+  to { stroke-dashoffset: var(--ring-offset, 282.7); }
+}
+
+@keyframes slide-up-fade {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ===== Animation Utilities ===== */
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-float-slow { animation: float-slow 8s ease-in-out infinite; }
+.animate-pokeball-spin { animation: pokeball-spin 20s linear infinite; }
+.animate-gradient-shift { 
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite; 
+}
+.animate-pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+.animate-shimmer { animation: shimmer 2s ease-in-out infinite; }
+.animate-ring-fill { animation: ring-fill 1.2s ease-out forwards; }
+.animate-slide-up { animation: slide-up-fade 0.8s ease-out forwards; }
+.animate-scale-in { animation: scale-in 0.5s ease-out forwards; }
+
+/* ===== Delay Utilities ===== */
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
+
+/* ===== Glassmorphism ===== */
+.glass {
+  background: var(--bg-nav);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ===== Hide scrollbar but keep scroll ===== */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

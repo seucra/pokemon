@@ -52,9 +52,9 @@ export const PokemonSearch: React.FC = () => {
 
   return (
     <div className="relative w-full max-w-lg animate-in fade-in slide-in-from-top-4 duration-700" ref={containerRef}>
-      <div className="relative group p-1 bg-gradient-to-r from-red-600 to-red-400 rounded-3xl shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]">
-        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-red-500 transition-colors z-10 transition-transform group-focus-within:scale-125 duration-500">
-          {loading ? <Loader2 className="w-6 h-6 animate-spin text-red-600" /> : <Search className="w-6 h-6 group-focus-within:rotate-90 transition-transform" />}
+      <div className="relative group p-[2px] bg-[var(--accent-primary)] rounded-2xl shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]">
+        <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-focus-within:text-[var(--accent-primary)] transition-colors z-10">
+          {loading ? <Loader2 className="w-5 h-5 animate-spin text-[var(--accent-primary)]" /> : <Search className="w-5 h-5" />}
         </div>
         <input
           type="text"
@@ -63,15 +63,15 @@ export const PokemonSearch: React.FC = () => {
           onFocus={() => setShowSuggestions(true)}
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           placeholder="ENTER POKÉMON NAME..."
-          className="w-full bg-white border-none rounded-[22px] py-5 pl-16 pr-12 text-slate-900 placeholder:text-slate-200 focus:outline-none focus:ring-0 text-sm font-black italic uppercase tracking-widest shadow-inner overflow-hidden"
+          className="w-full bg-[var(--bg-panel)] border-none rounded-[14px] py-4 pl-14 pr-12 text-[var(--text-primary)] placeholder:text-[var(--text-muted)]/50 focus:outline-none focus:ring-0 text-sm font-extrabold uppercase tracking-widest"
         />
-        <div className="absolute right-6 top-1/2 -translate-y-1/2 text-red-600/10 group-hover:text-red-600 transition-colors z-10 pointer-events-none">
-           <Sparkles className="w-5 h-5 animate-pulse" />
+        <div className="absolute right-5 top-1/2 -translate-y-1/2 text-[var(--text-muted)] group-hover:text-[var(--accent-primary)]/60 transition-colors z-10 pointer-events-none">
+           <Sparkles className="w-4 h-4 animate-pulse" />
         </div>
       </div>
 
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-4 bg-white border-2 border-red-600/10 rounded-[32px] shadow-2xl overflow-hidden z-[100] animate-in slide-in-from-top-3 duration-300">
+        <div className="absolute top-full left-0 right-0 mt-3 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-2xl overflow-hidden z-[100] animate-in slide-in-from-top-3 duration-300">
           {suggestions.map((name) => (
             <button
               key={name}
@@ -79,10 +79,10 @@ export const PokemonSearch: React.FC = () => {
                 e.preventDefault(); 
                 handleSelect(name);
               }}
-              className="w-full text-left px-8 py-5 text-slate-500 hover:bg-orange-500 hover:text-white transition-all capitalize font-black italic tracking-widest text-[11px] border-b border-slate-50 last:border-0 group flex items-center justify-between"
+              className="w-full text-left px-6 py-4 text-[var(--text-secondary)] hover:bg-[var(--accent-primary)] hover:text-white transition-all capitalize font-bold tracking-widest text-[11px] border-b border-[var(--border-subtle)] last:border-0 group flex items-center justify-between"
             >
-              <span className="group-hover:translate-x-3 transition-transform">{name.replace('-', ' ')}</span>
-              <div className="w-2 h-2 bg-white rounded-full opacity-0 group-hover:opacity-100 shadow-[0_0_10px_rgba(255,255,255,0.8)] transition-opacity"></div>
+              <span className="group-hover:translate-x-2 transition-transform">{name.replace('-', ' ')}</span>
+              <div className="w-1.5 h-1.5 bg-white rounded-full opacity-0 group-hover:opacity-100 shadow-[0_0_8px_rgba(255,255,255,0.6)] transition-opacity"></div>
             </button>
           ))}
         </div>
