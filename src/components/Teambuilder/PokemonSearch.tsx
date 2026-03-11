@@ -71,7 +71,7 @@ export const PokemonSearch: React.FC = () => {
       </div>
 
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 mt-3 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl shadow-2xl overflow-hidden z-[100] animate-in slide-in-from-top-3 duration-300">
+        <div className="absolute top-full left-0 right-0 mt-3 bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] overflow-y-auto max-h-[300px] z-[200] animate-in slide-in-from-top-3 duration-300 scrollbar-hide">
           {suggestions.map((name) => (
             <button
               key={name}
@@ -79,10 +79,11 @@ export const PokemonSearch: React.FC = () => {
                 e.preventDefault(); 
                 handleSelect(name);
               }}
-              className="w-full text-left px-6 py-4 text-[var(--text-secondary)] hover:bg-[var(--accent-primary)] hover:text-white transition-all capitalize font-bold tracking-widest text-[11px] border-b border-[var(--border-subtle)] last:border-0 group flex items-center justify-between"
+              className="w-full text-center px-6 py-4 text-[var(--text-secondary)] hover:bg-[var(--accent-primary)] hover:text-white transition-all capitalize font-black tracking-widest text-[11px] border-b border-[var(--border-subtle)]/50 last:border-0 group relative"
             >
-              <span className="group-hover:translate-x-2 transition-transform">{name.replace('-', ' ')}</span>
-              <div className="w-1.5 h-1.5 bg-white rounded-full opacity-0 group-hover:opacity-100 shadow-[0_0_8px_rgba(255,255,255,0.6)] transition-opacity"></div>
+              <span className="relative z-10">{name.replace('-', ' ')}</span>
+              {/* Subtle background glow on hover */}
+              <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
             </button>
           ))}
         </div>

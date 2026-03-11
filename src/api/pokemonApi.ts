@@ -49,5 +49,18 @@ export const pokemonApi = {
     } catch {
       return "Failed to load description.";
     }
+  },
+
+  /**
+   * Fetch move details
+   */
+  async getMoveDetails(name: string): Promise<any> {
+    try {
+      const response = await fetch(`${BASE_URL}/move/${name.toLowerCase()}`);
+      if (!response.ok) return null;
+      return response.json();
+    } catch {
+      return null;
+    }
   }
 };

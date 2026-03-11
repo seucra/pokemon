@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Shield, Zap, Box, Smartphone, Github, Sparkles, ChevronRight } from 'lucide-react';
+import { ArrowRight, Shield, Zap, Box, Smartphone, Github, Sparkles, ChevronRight, Target, ShieldCheck, Activity } from 'lucide-react';
 
 interface FeatureCardProps {
   icon: React.ReactNode;
@@ -137,6 +137,98 @@ export const LandingPage: React.FC<{ onStart: () => void }> = ({ onStart }) => {
               gradient="from-pink-500 to-rose-500"
               delay="600ms"
             />
+          </div>
+        </div>
+      </section>
+      
+      {/* ===== STRATEGIC FRONTIER SECTION ===== */}
+      <section className="relative py-32 px-6 overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-col lg:flex-row items-center gap-20">
+            <div className="w-full lg:w-1/2 space-y-8">
+              <div className="inline-flex items-center gap-3 bg-[var(--accent-primary)]/10 border border-[var(--accent-primary)]/20 px-6 py-2 rounded-full">
+                <Target className="w-4 h-4 text-[var(--accent-primary)]" />
+                <span className="text-xs font-black uppercase tracking-[0.3em] text-[var(--accent-primary)]">Battle Intelligence</span>
+              </div>
+              <h2 className="text-5xl md:text-7xl font-black tracking-tighter text-[var(--text-primary)] uppercase leading-[0.9]">
+                Strategic <br /><span className="text-[var(--accent-primary)]">Frontier</span>
+              </h2>
+              <p className="text-[var(--text-secondary)] text-lg font-medium leading-relaxed max-w-xl">
+                Beyond simple collection. Our engine simulates thousands of type-interaction permutations to ensure your squad isn't just strong—it's mathematically superior.
+              </p>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-2">
+                   <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-[var(--accent-primary)]" />
+                      <span className="text-xs font-black uppercase tracking-widest text-[var(--text-primary)]">Type Sovereignty</span>
+                   </div>
+                   <p className="text-[var(--text-muted)] text-xs font-medium">Automatic identification of quad-weaknesses and defensive voids.</p>
+                </div>
+                <div className="space-y-2">
+                   <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-[var(--accent-primary)]" />
+                      <span className="text-xs font-black uppercase tracking-widest text-[var(--text-primary)]">Meta-Analysis</span>
+                   </div>
+                   <p className="text-[var(--text-muted)] text-xs font-medium">Real-time stats processing for the current competitive landscape.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="w-full lg:w-1/2 relative group">
+               <div className="absolute inset-0 bg-gradient-to-tr from-[var(--accent-primary)]/20 to-transparent blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
+               <div className="relative bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-[40px] p-8 sm:p-12 shadow-2xl backdrop-blur-xl animate-float-slow">
+                  <div className="space-y-8">
+                     <div className="flex justify-between items-end">
+                        <div className="space-y-2">
+                           <div className="text-[10px] font-black uppercase tracking-[0.3em] text-[var(--text-muted)]">Squad Efficiency</div>
+                           <div className="text-4xl font-black text-[var(--text-primary)]">94.8<span className="text-[var(--accent-primary)]">%</span></div>
+                        </div>
+                        <div className="flex gap-1 items-end h-12">
+                           {[40, 70, 45, 90, 65, 80, 50].map((h, i) => (
+                              <div 
+                                key={i} 
+                                className="w-1.5 bg-[var(--accent-primary)] rounded-full animate-bounce" 
+                                style={{ height: `${h}%`, animationDelay: `${i * 100}ms` }}
+                              ></div>
+                           ))}
+                        </div>
+                     </div>
+                     
+                     <div className="space-y-4">
+                        <div className="h-[1px] bg-gradient-to-r from-[var(--border-subtle)] to-transparent"></div>
+                        <div className="grid grid-cols-3 gap-4">
+                           <div className="p-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)]">
+                              <div className="text-[8px] font-black uppercase text-[var(--text-muted)] mb-1">Defense</div>
+                              <div className="text-sm font-black text-[var(--text-primary)]">ELITE</div>
+                           </div>
+                           <div className="p-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)]">
+                              <div className="text-[8px] font-black uppercase text-[var(--text-muted)] mb-1">Coverage</div>
+                              <div className="text-sm font-black text-[var(--text-primary)]">FULL</div>
+                           </div>
+                           <div className="p-4 bg-[var(--bg-card)] rounded-2xl border border-[var(--border-subtle)]">
+                              <div className="text-[8px] font-black uppercase text-[var(--text-muted)] mb-1">Synergy</div>
+                              <div className="text-sm font-black text-[var(--accent-primary)]">ALPHA</div>
+                           </div>
+                        </div>
+                     </div>
+
+                     <div className="relative h-40 bg-[var(--bg-card)]/50 rounded-3xl border border-[var(--border-subtle)] overflow-hidden flex items-center justify-center">
+                        <div className="absolute inset-0 opacity-10">
+                           <div className="grid grid-cols-8 h-full">
+                              {Array.from({length: 32}).map((_, i) => (
+                                 <div key={i} className="border-[0.5px] border-[var(--text-primary)]"></div>
+                              ))}
+                           </div>
+                        </div>
+                        <Activity className="w-16 h-16 text-[var(--accent-primary)] animate-pulse" />
+                        <div className="absolute bottom-4 left-6 right-6 flex justify-between">
+                           <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[var(--text-muted)]">Scanning Type Vectors...</span>
+                           <span className="text-[7px] font-black uppercase tracking-[0.4em] text-[var(--accent-primary)]">System Nominal</span>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            </div>
           </div>
         </div>
       </section>

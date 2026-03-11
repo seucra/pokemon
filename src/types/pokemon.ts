@@ -38,6 +38,21 @@ export interface Pokemon {
   }[];
   height: number;
   weight: number;
+  moves: {
+    move: {
+      name: string;
+      url: string;
+    };
+    version_group_details: {
+      level_learned_at: number;
+      move_learn_method: {
+        name: string;
+      };
+      version_group: {
+        name: string;
+      };
+    }[];
+  }[];
 }
 
 export interface TeamMember {

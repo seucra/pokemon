@@ -4,7 +4,8 @@
 - **Phase 1: The Architect (Team Builder)**
   - Full team slot management (6 slots).
   - Advanced type coverage matrix (Defensive Strategy).
-  - Premium dark/light themes (GBA & Cinnabar Flare).
+  - Universal Pro-Grade Navigation (3-bar Sidebar Menu).
+  - Premium Themes (GBA Retro & Obsidian Cinnabar Flare).
   - Interactive Pokédex explorer.
 
 ---
@@ -13,7 +14,7 @@
 
 ### Phase 2: The Strategist (Data Hub)
 - **Move Set Validation**: Ensure moves are legal for the selected Pokémon.
-- **Export/Import**: Support for "Pokémon Showdown" format.
+- **Export/Import**: Support for "Pokémon Showdown" format (Integrated in Settings).
 - **IV/EV Calculator**: sliders and stat visualization for competitive builds.
 - **Damage Calculator**: Simulate matchups between team members and common threats.
 

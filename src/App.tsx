@@ -255,9 +255,12 @@ function App() {
                 </aside>
 
                 <section className="flex-1 space-y-8 animate-slide-up delay-100">
-                  <div className="bg-[var(--bg-panel)] border border-[var(--border-subtle)] p-8 rounded-[32px] relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 p-10 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none">
-                      <Shield className="w-60 h-60 -mr-16 -mt-16 text-[var(--accent-primary)]" />
+                  <div className="bg-[var(--bg-panel)] border border-[var(--border-subtle)] p-8 rounded-[32px] relative group">
+                    {/* Clipped background decoration */}
+                    <div className="absolute inset-0 rounded-[32px] overflow-hidden pointer-events-none">
+                      <div className="absolute top-0 right-0 p-10 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">
+                        <Shield className="w-60 h-60 -mr-16 -mt-16 text-[var(--accent-primary)]" />
+                      </div>
                     </div>
                     
                     <div className="relative z-10 flex flex-col items-center">
