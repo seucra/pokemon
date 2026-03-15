@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Filter, ArrowRight, X } from 'lucide-react';
+import { Search, Filter, X } from 'lucide-react';
 import { pokemonApi } from '../../api/pokemonApi';
 import type { Pokemon } from '../../types/pokemon';
 import { twMerge } from 'tailwind-merge';
@@ -380,43 +380,31 @@ export const Pokedex: React.FC = () => {
 
                   {/* Hover Content (Visible when hovered) */}
                   <div className={twMerge(
-                    "absolute inset-0 p-6 flex flex-col transition-all duration-500 bg-[var(--bg-card)]",
+                    "absolute inset-0 p-6 flex flex-col justify-center transition-all duration-500 bg-[var(--bg-card)]",
                     isHovered ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 pointer-events-none scale-110"
                   )}>
-                    <div className="flex items-center justify-between mb-4 border-b border-[var(--border-subtle)] pb-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-[var(--accent-primary)]">Biological Specs</span>
-                      <ArrowRight className="w-3 h-3 text-[var(--accent-primary)] opacity-50" />
-                    </div>
-
-                    <div className="space-y-4 flex-1">
+                    <div className="space-y-6">
                       {/* Stats Grid */}
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                      <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                         {[0, 1, 2, 5].map(idx => (
-                          <div key={idx} className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] border-b border-[var(--border-subtle)]/30 pb-1">
+                          <div key={idx} className="flex justify-between items-center text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)] border-b border-[var(--border-subtle)] pb-1.5">
                             <span>{['HP', 'ATK', 'DEF', 'SPD', 'SPD', 'SPD'][idx]}</span>
-                            <span className="text-[var(--text-primary)]">{p.stats[idx].base_stat}</span>
+                            <span className="text-[var(--text-primary)] text-sm">{p.stats[idx].base_stat}</span>
                           </div>
                         ))}
                       </div>
 
                       {/* Abilities */}
-                      <div className="space-y-1.5">
-                        <span className="text-[8px] font-black uppercase tracking-widest text-[var(--text-muted)]/60 block">Abilities</span>
-                        <div className="flex flex-wrap gap-1">
+                      <div className="space-y-3">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]/60 block">Abilities</span>
+                        <div className="flex flex-wrap gap-2">
                           {p.abilities.map(a => (
-                            <span key={a.ability.name} className="text-[8px] font-black uppercase py-1 px-2 bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-md text-[var(--text-secondary)]">
+                            <span key={a.ability.name} className="text-[10px] font-black uppercase py-1.5 px-3 bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-xl text-[var(--text-secondary)] shadow-sm">
                               {a.ability.name.replace('-', ' ')}
                             </span>
                           ))}
                         </div>
                       </div>
-                    </div>
-
-                    <div className="mt-auto pt-4 flex items-center justify-center gap-2 group/btn">
-                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--accent-primary)] group-hover/btn:translate-x-1 transition-transform">
-                        Access Archive
-                      </span>
-                      <ArrowRight className="w-3 h-3 text-[var(--accent-primary)]" />
                     </div>
                   </div>
               </div>
