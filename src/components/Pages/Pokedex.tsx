@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Maximize2, ArrowRight, X } from 'lucide-react';
+import { Search, Filter, ArrowRight, X } from 'lucide-react';
 import { pokemonApi } from '../../api/pokemonApi';
 import type { Pokemon } from '../../types/pokemon';
 import { twMerge } from 'tailwind-merge';
@@ -54,7 +54,6 @@ export const Pokedex: React.FC = () => {
   // Interaction State
   const [quickInfoId, setQuickInfoId] = useState<number | null>(null);
   const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
-  const lastClickTime = useRef<number>(0);
 
   useEffect(() => {
     const fetchAbilities = async () => {
@@ -180,19 +179,6 @@ export const Pokedex: React.FC = () => {
 
     return () => observer.disconnect();
   }, [hasMore, loading, loadingMore]);
-
-  const handlePokeInteraction = (p: Pokemon) => {
-    const now = Date.now();
-    const isDoubleClick = now - lastClickTime.current < 300;
-    lastClickTime.current = now;
-
-    if (isDoubleClick) {
-      setSelectedPokemon(p);
-      setQuickInfoId(null);
-    } else {
-      setQuickInfoId(quickInfoId === p.id ? null : p.id);
-    }
-  };
 
   return (
     <div className="w-full space-y-10 animate-in fade-in duration-700 pb-20 relative">
@@ -348,93 +334,91 @@ export const Pokedex: React.FC = () => {
             return (
               <div 
                 key={p.id}
-                onClick={() => handlePokeInteraction(p)}
-                onDoubleClick={() => setSelectedPokemon(p)}
+                onClick={() => setSelectedPokemon(p)}
                 onMouseEnter={() => setQuickInfoId(p.id)}
                 onMouseLeave={() => setQuickInfoId(null)}
                 className={twMerge(
-                  "group bg-[var(--bg-panel)] border transition-all cursor-pointer relative overflow-visible active:scale-95 shadow-sm rounded-[32px] p-6 flex flex-col items-center gap-4",
-                  isHovered ? "border-[var(--accent-primary)] bg-[var(--bg-card)] shadow-2xl -translate-y-2 z-50" : "border-[var(--border-subtle)] hover:bg-[var(--bg-card)]"
+                  "group bg-[var(--bg-panel)] border transition-all duration-500 cursor-pointer relative overflow-hidden active:scale-95 shadow-sm rounded-[32px] p-6 flex flex-col items-center gap-4 min-h-[280px]",
+                  isHovered ? "border-[var(--accent-primary)] bg-[var(--bg-card)] shadow-2xl -translate-y-2" : "border-[var(--border-subtle)] hover:bg-[var(--bg-card)]"
                 )}
               >
-                 {/* Quick Info Overlay */}
-                 <div className={twMerge(
-                   "absolute bottom-[80%] left-0 right-0 mb-4 transition-all duration-300 pointer-events-none z-[100]",
-                   isHovered ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-                 )}>
-                    <div className="bg-[var(--bg-card)] border border-[var(--accent-primary)]/40 rounded-2xl p-5 shadow-2xl backdrop-blur-xl pointer-events-auto">
-                       <div className="flex items-center justify-between mb-4">
-                          <span className="text-[10px] font-black uppercase tracking-widest text-[var(--accent-primary)]">Biological Specs</span>
-                          <Maximize2 className="w-3 h-3 text-[var(--accent-primary)]/40" />
-                       </div>
-                       <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                          <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">
-                             <span>HP</span>
-                             <span className="text-[var(--text-primary)]">{p.stats[0].base_stat}</span>
-                          </div>
-                          <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">
-                             <span>ATK</span>
-                             <span className="text-[var(--text-primary)]">{p.stats[1].base_stat}</span>
-                          </div>
-                          <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">
-                             <span>DEF</span>
-                             <span className="text-[var(--text-primary)]">{p.stats[2].base_stat}</span>
-                          </div>
-                          <div className="flex justify-between text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)]">
-                             <span>SPD</span>
-                             <span className="text-[var(--text-primary)]">{p.stats[5].base_stat}</span>
-                          </div>
-                       </div>
-                       
-                       <button 
-                         onClick={(e) => { e.stopPropagation(); setSelectedPokemon(p); }}
-                         className="w-full mt-4 py-2 bg-[var(--accent-primary)] text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-lg shadow-lg shadow-red-500/20 active:scale-95 transition-all flex items-center justify-center gap-2"
-                       >
-                          Open Archive <ArrowRight className="w-3 h-3" />
-                       </button>
+                  {/* Default Content (Visible when NOT hovered) */}
+                  <div className={twMerge(
+                    "w-full flex flex-col items-center gap-4 transition-all duration-500",
+                    isHovered ? "opacity-0 -translate-y-8 pointer-events-none scale-90" : "opacity-100 translate-y-0"
+                  )}>
+                    <div className="w-24 h-24 relative">
+                        <div className="absolute inset-0 rounded-full blur-2xl bg-[var(--accent-primary)]/5 transition-all group-hover:bg-[var(--accent-primary)]/20 group-hover:scale-125"></div>
+                        <img 
+                          src={p.sprites.other?.['official-artwork']?.front_default || p.sprites.front_default} 
+                          alt={p.name}
+                          className="w-full h-full object-contain relative z-10 transition-transform duration-500 drop-shadow-xl group-hover:scale-110"
+                        />
                     </div>
-                 </div>
+                    
+                    <div className="text-center space-y-1">
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--accent-primary)]/40 block">#{p.id.toString().padStart(4, '0')}</span>
+                      <h3 className="font-black text-xs uppercase tracking-tight text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors truncate px-1">
+                        {p.name.replace('-', ' ')}
+                      </h3>
+                    </div>
 
-                 {/* Card Content */}
-                 <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Maximize2 className="w-4 h-4 text-[var(--accent-primary)]/40" />
-                 </div>
-                 
-                 <div className="w-24 h-24 relative">
-                    <div className={twMerge(
-                      "absolute inset-0 rounded-full blur-2xl transition-all",
-                      isHovered ? "bg-[var(--accent-primary)]/20 scale-125" : "bg-[var(--accent-primary)]/5"
-                    )}></div>
-                    <img 
-                      src={p.sprites.other?.['official-artwork']?.front_default || p.sprites.front_default} 
-                      alt={p.name}
-                      className={twMerge(
-                        "w-full h-full object-contain relative z-10 transition-transform duration-500 drop-shadow-xl",
-                        isHovered ? "scale-125 -rotate-6" : "group-hover:scale-110"
-                      )}
-                    />
-                 </div>
-                 
-                 <div className="text-center space-y-1">
-                   <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--accent-primary)]/40 block">#{p.id.toString().padStart(4, '0')}</span>
-                   <h3 className="font-black text-xs uppercase tracking-tight text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors truncate px-1">
-                     {p.name.replace('-', ' ')}
-                   </h3>
-                 </div>
+                    <div className="flex gap-1.5 justify-center">
+                      {p.types.map((t) => (
+                        <span 
+                          key={t.type.name}
+                          className={twMerge(
+                            "text-[7px] font-black uppercase px-2 py-1 rounded-lg text-white/90 shadow-sm",
+                            TYPE_COLORS[t.type.name] || 'bg-slate-600'
+                          )}
+                        >
+                          {t.type.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
 
-                 <div className="flex gap-1.5 justify-center">
-                   {p.types.map((t) => (
-                     <span 
-                       key={t.type.name}
-                       className={twMerge(
-                         "text-[7px] font-black uppercase px-2 py-1 rounded-lg text-white/90 shadow-sm",
-                         TYPE_COLORS[t.type.name] || 'bg-slate-600'
-                       )}
-                     >
-                       {t.type.name}
-                     </span>
-                   ))}
-                 </div>
+                  {/* Hover Content (Visible when hovered) */}
+                  <div className={twMerge(
+                    "absolute inset-0 p-6 flex flex-col transition-all duration-500 bg-[var(--bg-card)]",
+                    isHovered ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 pointer-events-none scale-110"
+                  )}>
+                    <div className="flex items-center justify-between mb-4 border-b border-[var(--border-subtle)] pb-2">
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[var(--accent-primary)]">Biological Specs</span>
+                      <ArrowRight className="w-3 h-3 text-[var(--accent-primary)] opacity-50" />
+                    </div>
+
+                    <div className="space-y-4 flex-1">
+                      {/* Stats Grid */}
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                        {[0, 1, 2, 5].map(idx => (
+                          <div key={idx} className="flex justify-between items-center text-[9px] font-black uppercase tracking-widest text-[var(--text-muted)] border-b border-[var(--border-subtle)]/30 pb-1">
+                            <span>{['HP', 'ATK', 'DEF', 'SPD', 'SPD', 'SPD'][idx]}</span>
+                            <span className="text-[var(--text-primary)]">{p.stats[idx].base_stat}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Abilities */}
+                      <div className="space-y-1.5">
+                        <span className="text-[8px] font-black uppercase tracking-widest text-[var(--text-muted)]/60 block">Abilities</span>
+                        <div className="flex flex-wrap gap-1">
+                          {p.abilities.map(a => (
+                            <span key={a.ability.name} className="text-[8px] font-black uppercase py-1 px-2 bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-md text-[var(--text-secondary)]">
+                              {a.ability.name.replace('-', ' ')}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-auto pt-4 flex items-center justify-center gap-2 group/btn">
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em] text-[var(--accent-primary)] group-hover/btn:translate-x-1 transition-transform">
+                        Access Archive
+                      </span>
+                      <ArrowRight className="w-3 h-3 text-[var(--accent-primary)]" />
+                    </div>
+                  </div>
               </div>
             );
           })}
