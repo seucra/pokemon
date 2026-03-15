@@ -32,7 +32,7 @@ const CATEGORIES: CategoryCard[] = [
   },
   {
     id: 'moves',
-    name: 'Movements',
+    name: 'Moves',
     description: 'Offensive & Defensive Techniques',
     icon: Wind,
     accent: '#3B82F6',

@@ -3,32 +3,16 @@ import { X, Shield, Info, Activity, Target, Sword, ShieldCheck, Flame } from 'lu
 import type { Pokemon } from '../../types/pokemon';
 import { pokemonApi } from '../../api/pokemonApi';
 import { twMerge } from 'tailwind-merge';
+import { TYPE_COLORS, STAT_COLORS } from '../../constants/colors';
 
 interface PokedexEntryProps {
   pokemon: Pokemon;
   onClose: () => void;
 }
 
-const STAT_COLORS: Record<string, string> = {
-  hp: 'bg-rose-500',
-  attack: 'bg-orange-500',
-  defense: 'bg-yellow-500',
-  'special-attack': 'bg-blue-400',
-  'special-defense': 'bg-green-500',
-  speed: 'bg-pink-500',
-};
-
-const TYPE_COLORS: Record<string, string> = {
-  normal: 'bg-gray-400', fire: 'bg-red-500', water: 'bg-blue-500',
-  electric: 'bg-yellow-400', grass: 'bg-green-500', ice: 'bg-cyan-400',
-  fighting: 'bg-orange-700', poison: 'bg-purple-500', ground: 'bg-amber-600',
-  flying: 'bg-indigo-400', psychic: 'bg-pink-500', bug: 'bg-lime-500',
-  rock: 'bg-stone-600', ghost: 'bg-violet-700', dragon: 'bg-indigo-700',
-  dark: 'bg-neutral-800', steel: 'bg-slate-400', fairy: 'bg-rose-400',
-};
-
 export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) => {
   const [activeTab, setActiveTab] = useState<'stats' | 'info' | 'moves'>('stats');
+  const [moveTab, setMoveTab] = useState<'level-up' | 'machine' | 'tutor' | 'all'>('level-up');
   const [abilityData, setAbilityData] = useState<Record<string, string>>({});
   const [moveDetails, setMoveDetails] = useState<Record<string, any>>({});
   const [loadingExtras, setLoadingExtras] = useState(false);
@@ -55,21 +39,19 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
       abResults.forEach(r => abMap[r.name] = r.desc);
       setAbilityData(abMap);
 
-      // Fetch first 20 moves for performance
-      const sortedMoves = [...pokemon.moves].sort((a, b) => {
-        const aLvl = a.version_group_details[0]?.level_learned_at || 0;
-        const bLvl = b.version_group_details[0]?.level_learned_at || 0;
-        return aLvl - bLvl;
-      }).slice(0, 20);
-
-      const mvPromises = sortedMoves.map(async (m) => ({
+      // Fetch move details for ALL moves to ensure perfect coverage
+      // We do this in chunks to avoid overwhelming the browser/API
+      const allMoves = [...pokemon.moves];
+      const mvPromises = allMoves.map(async (m) => ({
         name: m.move.name,
         data: await pokemonApi.getMoveDetails(m.move.name)
       }));
       
       const mvResults = await Promise.all(mvPromises);
       const mvMap: Record<string, any> = {};
-      mvResults.forEach(r => mvMap[r.name] = r.data);
+      mvResults.forEach(r => {
+        if (r.data) mvMap[r.name] = r.data;
+      });
       setMoveDetails(mvMap);
       setLoadingExtras(false);
     };
@@ -78,9 +60,29 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
   }, [pokemon]);
 
   const sortedMoves = [...pokemon.moves].sort((a, b) => {
+    const aMethod = a.version_group_details[0]?.move_learn_method.name;
+    const bMethod = b.version_group_details[0]?.move_learn_method.name;
+    
+    // Sort by method first: level-up < tutor < machine
+    const methodOrder: Record<string, number> = { 'level-up': 0, 'tutor': 1, 'machine': 2 };
+    const aOrder = methodOrder[aMethod] ?? 3;
+    const bOrder = methodOrder[bMethod] ?? 3;
+    
+    if (aOrder !== bOrder) return aOrder - bOrder;
+    
+    // Within same method, sort by level
     const aLvl = a.version_group_details[0]?.level_learned_at || 0;
     const bLvl = b.version_group_details[0]?.level_learned_at || 0;
     return aLvl - bLvl;
+  });
+
+  const filteredMoves = sortedMoves.filter(m => {
+    const method = m.version_group_details[0]?.move_learn_method.name;
+    if (moveTab === 'all') return true;
+    if (moveTab === 'machine') return method === 'machine';
+    if (moveTab === 'level-up') return method === 'level-up';
+    if (moveTab === 'tutor') return method === 'tutor';
+    return false;
   });
 
   return (
@@ -238,28 +240,58 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
 
               {activeTab === 'moves' && (
                  <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                        <h3 className="text-xs font-black uppercase tracking-widest text-[var(--accent-primary)] border-l-4 border-[var(--accent-primary)] pl-4">Mastery Progression</h3>
-                       <span className="text-[10px] font-black text-[var(--text-muted)] uppercase tracking-widest bg-[var(--bg-card)] px-3 py-1.5 rounded-lg border border-[var(--border-subtle)]">{pokemon.moves.length} Archives Found</span>
+                       
+                       {/* Sub-Tabs */}
+                       <div className="flex bg-[var(--bg-card)] p-1 rounded-xl border border-[var(--border-subtle)] overflow-x-auto scrollbar-hide">
+                          {[
+                            { id: 'level-up', label: 'Level Up' },
+                            { id: 'machine', label: 'TM / HM' },
+                            { id: 'tutor', label: 'Tutor' },
+                            { id: 'all', label: 'All' },
+                          ].map(t => (
+                             <button
+                                key={t.id}
+                                onClick={() => setMoveTab(t.id as any)}
+                                className={twMerge(
+                                   "px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all whitespace-nowrap",
+                                   moveTab === t.id ? "bg-[var(--accent-primary)] text-white shadow-md shadow-red-500/20" : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                                )}
+                             >
+                                {t.label}
+                             </button>
+                          ))}
+                       </div>
                     </div>
 
-                    <div className="space-y-3">
-                       {sortedMoves.slice(0, 50).map((m) => {
+                    <div className="space-y-4">
+                       {filteredMoves.slice(0, 50).map((m) => {
                           const lvl = m.version_group_details[0]?.level_learned_at;
                           const method = m.version_group_details[0]?.move_learn_method.name;
                           const details = moveDetails[m.move.name];
+                          const typeColor = details ? (TYPE_COLORS[details.type.name] || 'bg-slate-500') : 'border-[var(--border-subtle)]';
 
                           return (
-                             <div key={m.move.name} className="flex items-center gap-4 p-4 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-2xl group hover:border-[var(--accent-primary)]/30 transition-all">
-                                <div className="w-10 h-10 bg-[var(--bg-panel)] rounded-xl flex items-center justify-center border border-[var(--border-subtle)] shrink-0">
-                                   <span className="text-xs font-black text-[var(--accent-primary)]">{lvl > 0 ? lvl : '—'}</span>
+                             <div 
+                                key={m.move.name} 
+                                className={twMerge(
+                                  "flex items-center gap-4 p-4 bg-[var(--bg-card)] border transition-all rounded-2xl group",
+                                  details ? `border-l-4 ${typeColor.replace('bg-', 'border-')}` : "border-[var(--border-subtle)]"
+                                )}
+                             >
+                                <div className="w-10 h-10 bg-[var(--bg-panel)] rounded-xl flex items-center justify-center border border-[var(--border-subtle)] shrink-0 shadow-inner">
+                                   <span className="text-[10px] font-black text-[var(--accent-primary)]">{lvl > 0 ? lvl : '—'}</span>
                                 </div>
+                                
                                 <div className="flex-1 min-w-0">
-                                    <div className="flex items-center gap-3 mb-1.5">
-                                       <span className="text-sm font-black uppercase tracking-tight text-[var(--text-primary)] truncate">{m.move.name.replace('-', ' ')}</span>
+                                    <div className="flex flex-wrap items-center gap-3 mb-1.5">
+                                       <span className="text-sm font-black uppercase tracking-tight text-[var(--text-primary)] truncate group-hover:text-[var(--accent-primary)] transition-colors">
+                                          {m.move.name.replace('-', ' ')}
+                                       </span>
                                        {details && (
                                           <span className={twMerge(
-                                             "text-[8px] font-black uppercase px-2 py-0.5 rounded-md text-white/90",
+                                             "text-[9px] font-black uppercase px-3 py-1 rounded-lg text-white shadow-md border border-white/20",
                                              TYPE_COLORS[details.type.name]
                                           )}>
                                              {details.type.name}
@@ -267,36 +299,57 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
                                        )}
                                     </div>
                                     <div className="flex items-center gap-3">
-                                       <span className="text-[10px] font-black uppercase text-[var(--text-muted)]">{method.replace('-', ' ')}</span>
-                                      {details && (
-                                         <>
-                                            <div className="w-1 h-1 rounded-full bg-[var(--border-subtle)]"></div>
-                                            <span className="text-[9px] font-black uppercase text-[var(--text-muted)] flex items-center gap-1">
-                                               {details.damage_class.name === 'physical' ? <Sword className="w-2.5 h-2.5" /> : <Flame className="w-2.5 h-2.5" />}
-                                               {details.damage_class.name}
-                                            </span>
-                                         </>
-                                      )}
-                                   </div>
+                                       <span className={twMerge(
+                                         "text-[10px] font-black uppercase p-1.5 rounded-md border shadow-sm transition-all",
+                                         details 
+                                           ? `${TYPE_COLORS[details.type.name].replace('bg-', 'text-')} ${TYPE_COLORS[details.type.name].replace('bg-', 'border-')}/30 bg-[var(--bg-panel)]` 
+                                           : "bg-[var(--bg-panel)] border-[var(--border-subtle)]/50 text-[var(--text-muted)]"
+                                       )}>
+                                          {method === 'level-up' && details ? details.damage_class.name : method.replace('-', ' ')}
+                                       </span>
+                                       {details && (
+                                          <>
+                                             <div className="w-1 h-1 rounded-full bg-[var(--border-subtle)] opacity-40"></div>
+                                             <span className={twMerge(
+                                                "text-[10px] font-black uppercase flex items-center gap-1.5 opacity-70 transition-colors",
+                                                TYPE_COLORS[details.type.name].replace('bg-', 'text-')
+                                             )}>
+                                                {details.damage_class.name === 'physical' ? <Sword className="w-3 h-3" /> : <Flame className="w-3 h-3" />}
+                                                {details.damage_class.name}
+                                             </span>
+                                          </>
+                                       )}
+                                    </div>
                                 </div>
+
                                 {details && (
-                                   <div className="flex gap-4 shrink-0">
+                                   <div className="flex gap-6 shrink-0 pr-2">
                                       <div className="text-center">
-                                         <span className="text-[8px] font-black uppercase text-[var(--text-muted)] block">PWR</span>
-                                         <span className="text-[10px] font-black text-[var(--text-primary)]">{details.power || '—'}</span>
+                                         <span className="text-[9px] font-black uppercase text-[var(--text-muted)] block mb-0.5">PWR</span>
+                                         <span className="text-base font-black text-[var(--text-primary)]">
+                                            {details.power !== null ? details.power : '—'}
+                                         </span>
                                       </div>
                                       <div className="text-center">
-                                         <span className="text-[8px] font-black uppercase text-[var(--text-muted)] block">ACC</span>
-                                         <span className="text-[10px] font-black text-[var(--text-primary)]">{details.accuracy || '—'}</span>
+                                         <span className="text-[9px] font-black uppercase text-[var(--text-muted)] block mb-0.5">ACC</span>
+                                         <span className="text-base font-black text-[var(--text-primary)]">
+                                            {details.accuracy !== null ? details.accuracy : '—'}
+                                         </span>
                                       </div>
                                    </div>
                                 )}
                              </div>
                           );
                        })}
+                       {filteredMoves.length === 0 && (
+                          <div className="py-20 text-center space-y-4 bg-[var(--bg-card)]/30 rounded-[32px] border border-dashed border-[var(--border-subtle)]">
+                             <div className="w-12 h-12 border-2 border-[var(--accent-primary)]/20 border-t-[var(--accent-primary)] rounded-full animate-spin mx-auto"></div>
+                             <p className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">No archives found in this sector</p>
+                          </div>
+                       )}
                     </div>
-                    {pokemon.moves.length > 50 && (
-                       <p className="text-center text-[9px] font-black uppercase text-[var(--text-muted)] opacity-40 italic">Truncating archive at 50 nodes...</p>
+                    {filteredMoves.length > 50 && (
+                       <p className="text-center text-[9px] font-black uppercase text-[var(--text-muted)] opacity-40 italic">Truncating sector at 50 nodes for performance...</p>
                     )}
                  </div>
               )}

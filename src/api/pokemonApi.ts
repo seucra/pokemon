@@ -4,6 +4,8 @@ const BASE_URL = 'https://pokeapi.co/api/v2';
 
 let cachedNames: string[] | null = null;
 let cachedAbilities: string[] | null = null;
+const moveCache: Record<string, any> = {};
+const abilityDescCache: Record<string, string> = {};
 
 export const pokemonApi = {
   /**
@@ -45,12 +47,15 @@ export const pokemonApi = {
    * Fetch ability effect description
    */
   async getAbilityDescription(name: string): Promise<string> {
+    if (abilityDescCache[name]) return abilityDescCache[name];
     try {
       const response = await fetch(`${BASE_URL}/ability/${name.toLowerCase()}`);
       if (!response.ok) return "No description available.";
       const data = await response.json();
       const entry = data.effect_entries.find((e: any) => e.language.name === 'en') || data.flavor_text_entries.find((e: any) => e.language.name === 'en');
-      return entry?.short_effect || entry?.effect || entry?.flavor_text || "No description available.";
+      const desc = entry?.short_effect || entry?.effect || entry?.flavor_text || "No description available.";
+      abilityDescCache[name] = desc;
+      return desc;
     } catch {
       return "Failed to load description.";
     }
@@ -60,10 +65,13 @@ export const pokemonApi = {
    * Fetch move details
    */
   async getMoveDetails(name: string): Promise<any> {
+    if (moveCache[name]) return moveCache[name];
     try {
       const response = await fetch(`${BASE_URL}/move/${name.toLowerCase()}`);
       if (!response.ok) return null;
-      return response.json();
+      const data = await response.json();
+      moveCache[name] = data;
+      return data;
     } catch {
       return null;
     }
