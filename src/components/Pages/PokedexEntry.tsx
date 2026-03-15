@@ -33,6 +33,15 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
   const [moveDetails, setMoveDetails] = useState<Record<string, any>>({});
   const [loadingExtras, setLoadingExtras] = useState(false);
 
+  // Prevent background scrolling when archive is open
+  useEffect(() => {
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalStyle;
+    };
+  }, []);
+
   useEffect(() => {
     const fetchExtras = async () => {
       setLoadingExtras(true);
@@ -75,21 +84,24 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
   });
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 sm:p-6 backdrop-blur-3xl bg-[var(--bg-main)]/60 animate-in fade-in duration-500">
+    <div 
+      className="fixed inset-0 z-[200] flex items-center justify-center p-0 sm:p-6 backdrop-blur-3xl bg-[var(--bg-main)]/60 animate-in fade-in duration-500"
+      onClick={onClose}
+    >
       <div 
-        className="relative w-full max-w-5xl bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-[40px] shadow-2xl overflow-hidden flex flex-col md:flex-row h-[90vh] md:h-auto md:max-h-[90vh] animate-in zoom-in-95 duration-500"
+        className="relative w-full max-w-5xl bg-[var(--bg-panel)] border-x border-b sm:border border-[var(--border-subtle)] rounded-t-3xl sm:rounded-[40px] shadow-2xl flex flex-col md:flex-row h-full sm:h-auto max-h-full sm:max-h-[90vh] animate-in slide-in-from-bottom sm:zoom-in-95 duration-500 overflow-y-auto sm:overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button 
           onClick={onClose}
-          className="absolute top-6 right-6 p-3 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-full text-[var(--text-muted)] hover:text-[var(--accent-primary)] hover:border-[var(--accent-primary)]/30 transition-all z-50 shadow-lg active:scale-95"
+          className="fixed sm:absolute top-4 sm:top-6 right-4 sm:right-6 p-3 bg-[var(--bg-card)]/80 sm:bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-full text-[var(--text-muted)] hover:text-[var(--accent-primary)] hover:border-[var(--accent-primary)]/30 transition-all z-[100] shadow-xl backdrop-blur-md active:scale-95"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Left Side: Visuals & Core Info */}
-        <div className="w-full md:w-2/5 p-8 sm:p-12 relative flex flex-col items-center justify-center bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-panel)] to-[var(--bg-panel)] border-r border-[var(--border-subtle)] shrink-0">
+        <div className="w-full md:w-2/5 p-6 sm:p-12 relative flex flex-col items-center justify-center bg-gradient-to-br from-[var(--bg-card)] via-[var(--bg-panel)] to-[var(--bg-panel)] border-b md:border-b-0 md:border-r border-[var(--border-subtle)] shrink-0 overflow-hidden">
            <div className="absolute inset-0 opacity-[0.03] pointer-events-none overflow-hidden">
              <Shield className="w-96 h-96 -ml-20 -mt-20 text-[var(--accent-primary)] rotate-12" />
            </div>
@@ -137,9 +149,9 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
         </div>
 
         {/* Right Side: Detailed Tabs */}
-        <div className="flex-1 flex flex-col bg-[var(--bg-panel)] overflow-hidden">
+        <div className="flex-1 flex flex-col bg-[var(--bg-panel)] sm:overflow-hidden">
            {/* Tab Headers */}
-           <div className="flex border-b border-[var(--border-subtle)] px-8 pt-8 gap-8 overflow-x-auto scrollbar-hide shrink-0">
+           <div className="flex border-b border-[var(--border-subtle)] px-6 sm:px-8 pt-6 sm:pt-8 gap-6 sm:gap-8 overflow-x-auto scrollbar-hide shrink-0 bg-[var(--bg-panel)] sticky top-0 md:relative z-40">
               {[
                 { id: 'stats', label: 'Base Stats', icon: Activity },
                 { id: 'info', label: 'Abilities', icon: Info },
@@ -163,16 +175,16 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
            </div>
 
            {/* Tab Content */}
-           <div className="flex-1 overflow-y-auto p-8 sm:p-10 scrollbar-hide">
+           <div className="flex-1 sm:overflow-y-auto p-6 sm:p-10 scrollbar-hide">
               {activeTab === 'stats' && (
                  <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                     {pokemon.stats.map((s) => (
-                       <div key={s.stat.name} className="space-y-2">
+                       <div key={s.stat.name} className="space-y-3">
                           <div className="flex justify-between items-center px-1">
-                             <span className="text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)]">{s.stat.name.replace('special-', 'Sp. ')}</span>
-                             <span className="text-sm font-black text-[var(--text-primary)]">{s.base_stat}</span>
+                             <span className="text-[11px] font-black uppercase tracking-widest text-[var(--text-muted)]">{s.stat.name.replace('special-', 'Sp. ')}</span>
+                             <span className="text-base font-black text-[var(--text-primary)]">{s.base_stat}</span>
                           </div>
-                          <div className="h-2.5 bg-[var(--bg-card)] rounded-full overflow-hidden border border-[var(--border-subtle)]">
+                          <div className="h-3 bg-[var(--bg-card)] rounded-full overflow-hidden border border-[var(--border-subtle)]">
                              <div 
                                 className={twMerge("h-full transition-all duration-1000 ease-out rounded-full shadow-lg", STAT_COLORS[s.stat.name])}
                                 style={{ width: `${(s.base_stat / 255) * 100}%` }}
@@ -203,11 +215,11 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
                                    <span className="px-3 py-1 bg-amber-500/10 text-amber-500 text-[8px] font-black uppercase tracking-widest rounded-full border border-amber-500/20">Hidden Factor</span>
                                 )}
                              </div>
-                             <div className="space-y-4">
-                                <p className="text-[var(--text-primary)]/80 text-xs font-medium leading-relaxed">
+                             <div className="space-y-5">
+                                <p className="text-[var(--text-primary)]/90 text-sm font-medium leading-[1.6]">
                                    {abilityData[a.ability.name] || (loadingExtras ? "Processing Bio-Stream..." : "Scanning Archive...")}
                                 </p>
-                                <div className="pt-4 border-t border-[var(--border-subtle)]/50 flex flex-wrap gap-4">
+                                <div className="pt-5 border-t border-[var(--border-subtle)]/50 flex flex-wrap gap-5">
                                    <div className="flex items-center gap-2">
                                       <Activity className="w-3 h-3 text-[var(--accent-primary)]" />
                                       <span className="text-[9px] font-black uppercase text-[var(--text-muted)]">Battle Class: <span className="text-[var(--text-primary)]">Tactical</span></span>
@@ -243,19 +255,19 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
                                    <span className="text-xs font-black text-[var(--accent-primary)]">{lvl > 0 ? lvl : '—'}</span>
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                   <div className="flex items-center gap-3 mb-1">
-                                      <span className="text-xs font-black uppercase tracking-tight text-[var(--text-primary)] truncate">{m.move.name.replace('-', ' ')}</span>
-                                      {details && (
-                                         <span className={twMerge(
-                                            "text-[7px] font-black uppercase px-2 py-0.5 rounded-md text-white/90",
-                                            TYPE_COLORS[details.type.name]
-                                         )}>
-                                            {details.type.name}
-                                         </span>
-                                      )}
-                                   </div>
-                                   <div className="flex items-center gap-3">
-                                      <span className="text-[9px] font-black uppercase text-[var(--text-muted)]">{method.replace('-', ' ')}</span>
+                                    <div className="flex items-center gap-3 mb-1.5">
+                                       <span className="text-sm font-black uppercase tracking-tight text-[var(--text-primary)] truncate">{m.move.name.replace('-', ' ')}</span>
+                                       {details && (
+                                          <span className={twMerge(
+                                             "text-[8px] font-black uppercase px-2 py-0.5 rounded-md text-white/90",
+                                             TYPE_COLORS[details.type.name]
+                                          )}>
+                                             {details.type.name}
+                                          </span>
+                                       )}
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                       <span className="text-[10px] font-black uppercase text-[var(--text-muted)]">{method.replace('-', ' ')}</span>
                                       {details && (
                                          <>
                                             <div className="w-1 h-1 rounded-full bg-[var(--border-subtle)]"></div>
