@@ -13,7 +13,11 @@ import { twMerge } from 'tailwind-merge'
 type View = 'landing' | 'dex' | 'builder'
 
 function App() {
-  const [view, setView] = useState<View>('landing')
+  const [view, setView] = useState<View>(() => {
+    const savedView = localStorage.getItem('app-view');
+    return (savedView as View) || 'landing';
+  })
+  
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const { getActiveTeam, theme, setTheme } = useTeamStore()
@@ -21,6 +25,7 @@ function App() {
 
   const navigate = (newView: View) => {
     setView(newView)
+    localStorage.setItem('app-view', newView)
     setIsMenuOpen(false)
     setShowSettings(false)
     window.scrollTo({ top: 0, behavior: 'smooth' })

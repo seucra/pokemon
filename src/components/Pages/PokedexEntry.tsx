@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Shield, Info, Activity, Target, Sword, ShieldCheck, Flame } from 'lucide-react';
+import { X, Shield, Info, Activity, Target, Sword, ShieldCheck, Flame, BookOpen, Dna, ZapOff, AlertCircle, ChevronRight } from 'lucide-react';
 import type { Pokemon } from '../../types/pokemon';
 import { pokemonApi } from '../../api/pokemonApi';
 import { twMerge } from 'tailwind-merge';
@@ -11,10 +11,13 @@ interface PokedexEntryProps {
 }
 
 export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) => {
-  const [activeTab, setActiveTab] = useState<'stats' | 'info' | 'moves'>('stats');
+  const [activeTab, setActiveTab] = useState<'desc' | 'stats' | 'info' | 'moves'>('desc');
   const [moveTab, setMoveTab] = useState<'level-up' | 'machine' | 'tutor' | 'all'>('level-up');
   const [abilityData, setAbilityData] = useState<Record<string, string>>({});
   const [moveDetails, setMoveDetails] = useState<Record<string, any>>({});
+  const [speciesData, setSpeciesData] = useState<any>(null);
+  const [evolutionChain, setEvolutionChain] = useState<any[]>([]);
+  const [typeEffectiveness, setTypeEffectiveness] = useState<Record<string, number>>({});
   const [loadingExtras, setLoadingExtras] = useState(false);
 
   // Prevent background scrolling when archive is open
@@ -29,31 +32,78 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
   useEffect(() => {
     const fetchExtras = async () => {
       setLoadingExtras(true);
-      const abPromises = pokemon.abilities.map(async (a) => ({
-        name: a.ability.name,
-        desc: await pokemonApi.getAbilityDescription(a.ability.name)
-      }));
       
-      const abResults = await Promise.all(abPromises);
-      const abMap: Record<string, string> = {};
-      abResults.forEach(r => abMap[r.name] = r.desc);
-      setAbilityData(abMap);
+      try {
+        // 1. Fetch Species & Evolution Chain
+        const species = await pokemonApi.getPokemonSpecies(pokemon.id);
+        setSpeciesData(species);
+        
+        if (species?.evolution_chain?.url) {
+          const chainData = await pokemonApi.getEvolutionChain(species.evolution_chain.url);
+          const chain: any[] = [];
+          let current = chainData.chain;
+          
+          while (current) {
+            chain.push({
+              name: current.species.name,
+              requirements: current.evolution_details[0] || null
+            });
+            current = current.evolves_to[0];
+          }
+          setEvolutionChain(chain);
+        }
 
-      // Fetch move details for ALL moves to ensure perfect coverage
-      // We do this in chunks to avoid overwhelming the browser/API
-      const allMoves = [...pokemon.moves];
-      const mvPromises = allMoves.map(async (m) => ({
-        name: m.move.name,
-        data: await pokemonApi.getMoveDetails(m.move.name)
-      }));
-      
-      const mvResults = await Promise.all(mvPromises);
-      const mvMap: Record<string, any> = {};
-      mvResults.forEach(r => {
-        if (r.data) mvMap[r.name] = r.data;
-      });
-      setMoveDetails(mvMap);
-      setLoadingExtras(false);
+        // 2. Fetch Type Effectiveness
+        const typePromises = pokemon.types.map(t => pokemonApi.getTypeDetails(t.type.name));
+        const typeResults = await Promise.all(typePromises);
+        
+        const effectiveness: Record<string, number> = {};
+        const ALL_TYPES = Object.keys(TYPE_COLORS);
+        ALL_TYPES.forEach(t => effectiveness[t] = 1);
+
+        typeResults.forEach(data => {
+          if (!data) return;
+          data.damage_relations.double_damage_from.forEach((t: any) => effectiveness[t.name] *= 2);
+          data.damage_relations.half_damage_from.forEach((t: any) => effectiveness[t.name] *= 0.5);
+          data.damage_relations.no_damage_from.forEach((t: any) => effectiveness[t.name] *= 0);
+        });
+        setTypeEffectiveness(effectiveness);
+
+        // 3. Fetch Abilities
+        const abPromises = pokemon.abilities.map(async (a) => ({
+          name: a.ability.name,
+          desc: await pokemonApi.getAbilityDescription(a.ability.name)
+        }));
+        
+        const abResults = await Promise.all(abPromises);
+        const abMap: Record<string, string> = {};
+        abResults.forEach(r => abMap[r.name] = r.desc);
+        setAbilityData(abMap);
+
+        // 4. Fetch move details
+        const allMoves = [...pokemon.moves];
+        const topMoves = allMoves.sort((a, b) => {
+          const aLvl = a.version_group_details[0]?.level_learned_at || 0;
+          const bLvl = b.version_group_details[0]?.level_learned_at || 0;
+          return aLvl - bLvl;
+        }).slice(0, 100);
+
+        const mvPromises = topMoves.map(async (m) => ({
+          name: m.move.name,
+          data: await pokemonApi.getMoveDetails(m.move.name)
+        }));
+        
+        const mvResults = await Promise.all(mvPromises);
+        const mvMap: Record<string, any> = {};
+        mvResults.forEach(r => {
+          if (r.data) mvMap[r.name] = r.data;
+        });
+        setMoveDetails(mvMap);
+      } catch (err) {
+        console.error("Failed to sync archive extras:", err);
+      } finally {
+        setLoadingExtras(false);
+      }
     };
 
     fetchExtras();
@@ -155,9 +205,10 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
            {/* Tab Headers */}
            <div className="flex border-b border-[var(--border-subtle)] px-6 sm:px-8 pt-6 sm:pt-8 gap-6 sm:gap-8 overflow-x-auto scrollbar-hide shrink-0 bg-[var(--bg-panel)] sticky top-0 md:relative z-40">
               {[
+                { id: 'desc', label: 'DESC', icon: BookOpen },
                 { id: 'stats', label: 'Base Stats', icon: Activity },
                 { id: 'info', label: 'Abilities', icon: Info },
-                { id: 'moves', label: 'Moves Mastery', icon: Target },
+                { id: 'moves', label: 'Moves', icon: Target },
               ].map((tab) => (
                  <button
                     key={tab.id}
@@ -178,6 +229,92 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
 
            {/* Tab Content */}
            <div className="flex-1 sm:overflow-y-auto p-6 sm:p-10 scrollbar-hide">
+              {activeTab === 'desc' && (
+                 <div className="space-y-12 animate-in fade-in slide-in-from-right-4 duration-500">
+                    {/* Species Description */}
+                    <div className="space-y-4">
+                       <h3 className="text-xs font-black uppercase tracking-widest text-[var(--accent-primary)] border-l-4 border-[var(--accent-primary)] pl-4">Bio-Data Scan</h3>
+                       <p className="text-sm font-medium leading-[1.8] text-[var(--text-primary)]/80 italic bg-[var(--bg-card)]/30 p-6 rounded-3xl border border-[var(--border-subtle)]">
+                          {speciesData?.flavor_text_entries.find((e: any) => e.language.name === 'en')?.flavor_text.replace(/\f/g, ' ') || "Scanning DNA sequences..."}
+                       </p>
+                    </div>
+
+                    {/* Evolution Line */}
+                    <div className="space-y-6">
+                       <h3 className="text-xs font-black uppercase tracking-widest text-[var(--accent-primary)] border-l-4 border-[var(--accent-primary)] pl-4">Metamorphic Sequence</h3>
+                       <div className="flex flex-wrap items-center gap-6 p-6 bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-[32px]">
+                          {evolutionChain.length > 0 ? evolutionChain.map((evo, i) => (
+                             <React.Fragment key={evo.name}>
+                                <div className={twMerge(
+                                   "flex flex-col items-center gap-2 px-6 py-4 rounded-2xl border transition-all",
+                                   evo.name === pokemon.name ? "bg-[var(--accent-primary)]/10 border-[var(--accent-primary)]/30 text-[var(--accent-primary)]" : "bg-[var(--bg-card)] border-[var(--border-subtle)] text-[var(--text-muted)]"
+                                )}>
+                                   <span className="text-[10px] font-black uppercase tracking-widest">{evo.name}</span>
+                                   <span className="text-[8px] font-bold opacity-60 uppercase tracking-tighter">
+                                     {i === 0 ? 'Foundation' : i === 1 ? 'Phase I' : 'Phase II'}
+                                   </span>
+                                </div>
+                                {i < evolutionChain.length - 1 && (
+                                   <div className="flex flex-col items-center gap-1">
+                                      <ChevronRight className="w-4 h-4 text-[var(--text-muted)] opacity-30" />
+                                      {evolutionChain[i+1].requirements && (
+                                         <span className="text-[7px] font-black uppercase text-[var(--accent-primary)] opacity-60 max-w-[80px] text-center leading-tight">
+                                            {evolutionChain[i+1].requirements.trigger.name.replace('-', ' ')}
+                                            {evolutionChain[i+1].requirements.min_level ? ` (Lv. ${evolutionChain[i+1].requirements.min_level})` : ''}
+                                            {evolutionChain[i+1].requirements.item ? ` w/ ${evolutionChain[i+1].requirements.item.name.replace('-', ' ')}` : ''}
+                                         </span>
+                                      )}
+                                   </div>
+                                )}
+                             </React.Fragment>
+                          )) : (
+                             <div className="w-full py-4 text-center text-[10px] font-black uppercase text-[var(--text-muted)] opacity-40">Calculating Evolution Matrix...</div>
+                          )}
+                       </div>
+                    </div>
+
+                    {/* Type Effectiveness */}
+                    <div className="space-y-6 pb-10">
+                       <h3 className="text-xs font-black uppercase tracking-widest text-[var(--accent-primary)] border-l-4 border-[var(--accent-primary)] pl-4">Tactical Vulnerabilities</h3>
+                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                          {/* Weaknesses */}
+                          <div className="space-y-4">
+                             <div className="flex items-center gap-2 px-1">
+                                <AlertCircle className="w-3 h-3 text-red-500/60" />
+                                <span className="text-[9px] font-black uppercase tracking-widest text-red-500/60 block">Weakness Analysis</span>
+                             </div>
+                             <div className="flex flex-wrap gap-2">
+                                {Object.entries(typeEffectiveness)
+                                   .filter(([_, mult]) => mult > 1)
+                                   .map(([type, mult]) => (
+                                      <div key={type} className="flex flex-col items-center group">
+                                         <span className={twMerge("px-3 py-1.5 rounded-lg text-[9px] font-black uppercase text-white shadow-sm transition-transform group-hover:scale-110", TYPE_COLORS[type])}>{type}</span>
+                                         <span className="text-[8px] font-black text-red-500 mt-1">{mult}x</span>
+                                      </div>
+                                   ))}
+                             </div>
+                          </div>
+                          {/* Resistances & Immunities */}
+                          <div className="space-y-4">
+                             <div className="flex items-center gap-2 px-1">
+                                <ShieldCheck className="w-3 h-3 text-green-500/60" />
+                                <span className="text-[9px] font-black uppercase tracking-widest text-green-500/60 block">Resistance Analysis</span>
+                             </div>
+                             <div className="flex flex-wrap gap-2">
+                                {Object.entries(typeEffectiveness)
+                                   .filter(([_, mult]) => mult < 1)
+                                   .map(([type, mult]) => (
+                                      <div key={type} className="flex flex-col items-center group">
+                                         <span className={twMerge("px-3 py-1.5 rounded-lg text-[9px] font-black uppercase text-white shadow-sm transition-transform group-hover:scale-110", TYPE_COLORS[type])}>{type}</span>
+                                         <span className={twMerge("text-[8px] font-black mt-1", mult === 0 ? "text-blue-500" : "text-green-500")}>{mult === 0 ? "IMMUNE" : `${mult}x`}</span>
+                                      </div>
+                                   ))}
+                             </div>
+                          </div>
+                       </div>
+                    </div>
+                 </div>
+              )}
               {activeTab === 'stats' && (
                  <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
                     {pokemon.stats.map((s) => (
@@ -300,22 +437,24 @@ export const PokedexEntry: React.FC<PokedexEntryProps> = ({ pokemon, onClose }) 
                                     </div>
                                     <div className="flex items-center gap-3">
                                        <span className={twMerge(
-                                         "text-[10px] font-black uppercase p-1.5 rounded-md border shadow-sm transition-all",
+                                         "text-[10px] font-black uppercase p-1.5 rounded-md border shadow-sm transition-all flex items-center gap-1.5",
                                          details 
                                            ? `${TYPE_COLORS[details.type.name].replace('bg-', 'text-')} ${TYPE_COLORS[details.type.name].replace('bg-', 'border-')}/30 bg-[var(--bg-panel)]` 
                                            : "bg-[var(--bg-panel)] border-[var(--border-subtle)]/50 text-[var(--text-muted)]"
                                        )}>
+                                          {details && (
+                                            details.damage_class.name === 'physical' ? <Sword className="w-3 h-3" /> : <Flame className="w-3 h-3" />
+                                          )}
                                           {method === 'level-up' && details ? details.damage_class.name : method.replace('-', ' ')}
                                        </span>
                                        {details && (
                                           <>
                                              <div className="w-1 h-1 rounded-full bg-[var(--border-subtle)] opacity-40"></div>
                                              <span className={twMerge(
-                                                "text-[10px] font-black uppercase flex items-center gap-1.5 opacity-70 transition-colors",
+                                                "text-[9px] font-black uppercase flex items-center gap-1 opacity-70 transition-colors",
                                                 TYPE_COLORS[details.type.name].replace('bg-', 'text-')
                                              )}>
-                                                {details.damage_class.name === 'physical' ? <Sword className="w-3 h-3" /> : <Flame className="w-3 h-3" />}
-                                                {details.damage_class.name}
+                                                {details.type.name} sector
                                              </span>
                                           </>
                                        )}

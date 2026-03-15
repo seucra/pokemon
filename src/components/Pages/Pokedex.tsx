@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Database, Zap, Disc, Wind, Cherry, Heart, ChevronRight, ArrowLeft } from 'lucide-react';
 import { PokemonDex } from './PokemonDex';
+import { AbilitiesDex } from './AbilitiesDex';
 import { twMerge } from 'tailwind-merge';
 
 type DexCategory = 'none' | 'pokemon' | 'abilities' | 'moves' | 'items' | 'berries' | 'natures';
@@ -28,7 +29,6 @@ const CATEGORIES: CategoryCard[] = [
     description: 'Passive Traits & Battle Effects',
     icon: Zap,
     accent: '#F59E0B',
-    status: 'Work in Progress',
   },
   {
     id: 'moves',
@@ -82,6 +82,21 @@ export const Pokedex: React.FC = () => {
     );
   }
 
+  if (selectedCategory === 'abilities') {
+    return (
+      <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <button 
+          onClick={() => setSelectedCategory('none')}
+          className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[var(--text-muted)] hover:text-amber-500 transition-colors group mb-4"
+        >
+          <ArrowLeft className="w-3 h-3 group-hover:-translate-x-1 transition-transform" />
+          Back to Archives
+        </button>
+        <AbilitiesDex />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-6xl mx-auto space-y-16 py-10 animate-in fade-in duration-700">
       <div className="text-center space-y-4">
@@ -97,7 +112,11 @@ export const Pokedex: React.FC = () => {
         {CATEGORIES.map((cat) => (
           <button
             key={cat.id}
-            onClick={() => cat.id === 'pokemon' && setSelectedCategory('pokemon')}
+            onClick={() => {
+              if (cat.id === 'pokemon' || cat.id === 'abilities') {
+                setSelectedCategory(cat.id);
+              }
+            }}
             className={twMerge(
               "group relative p-8 bg-[var(--bg-panel)] border border-[var(--border-subtle)] rounded-[40px] text-left transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl active:scale-95 overflow-hidden",
               cat.status ? "cursor-not-allowed opacity-80" : "hover:border-[var(--accent-primary)]/40 hover:bg-[var(--bg-card)]"

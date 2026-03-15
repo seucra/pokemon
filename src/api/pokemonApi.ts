@@ -117,5 +117,42 @@ export const pokemonApi = {
     const data = await response.json();
     cachedAbilities = data.results.map((a: any) => a.name);
     return cachedAbilities || [];
+  },
+
+  /**
+   * Fetch Pokemon species data for description and evolution links
+   */
+  async getPokemonSpecies(nameOrId: string | number): Promise<any> {
+    const response = await fetch(`${BASE_URL}/pokemon-species/${nameOrId.toString().toLowerCase()}`);
+    if (!response.ok) return null;
+    return response.json();
+  },
+
+  /**
+   * Fetch evolution chain data
+   */
+  async getEvolutionChain(idOrUrl: string): Promise<any> {
+    const url = idOrUrl.startsWith('http') ? idOrUrl : `${BASE_URL}/evolution-chain/${idOrUrl}`;
+    const response = await fetch(url);
+    if (!response.ok) return null;
+    return response.json();
+  },
+
+  /**
+   * Fetch type relations for strengths/weaknesses
+   */
+  async getTypeDetails(typeName: string): Promise<any> {
+    const response = await fetch(`${BASE_URL}/type/${typeName.toLowerCase()}`);
+    if (!response.ok) return null;
+    return response.json();
+  },
+
+  /**
+   * Fetch full ability details
+   */
+  async getAbility(name: string): Promise<any> {
+    const response = await fetch(`${BASE_URL}/ability/${name.toLowerCase()}`);
+    if (!response.ok) return null;
+    return response.json();
   }
 };
