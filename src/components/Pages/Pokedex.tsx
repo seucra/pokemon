@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, Filter, ChevronLeft, ChevronRight, Maximize2, ArrowRight, X } from 'lucide-react';
+import { Search, Filter, Maximize2, ArrowRight, X } from 'lucide-react';
 import { pokemonApi } from '../../api/pokemonApi';
 import type { Pokemon } from '../../types/pokemon';
 import { twMerge } from 'tailwind-merge';
@@ -17,14 +17,13 @@ const TYPE_COLORS: Record<string, string> = {
 export const Pokedex: React.FC = () => {
   const [pokemonList, setPokemonList] = useState<Pokemon[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [offset, setOffset] = useState(0);
   const [hasMore, setHasMore] = useState(true);
   const LIMIT = 30;
 
   const observerTarget = useRef<HTMLDivElement>(null);
-  const isInitialMount = useRef(true);
 
   // Filter State
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -82,6 +81,7 @@ export const Pokedex: React.FC = () => {
       const isReset = offset === 0;
       if (isReset) {
         setLoading(true);
+        setHasMore(true);
       } else {
         setLoadingMore(true);
       }
@@ -127,10 +127,8 @@ export const Pokedex: React.FC = () => {
             );
           }
         } else {
-          // Default list fetch logic (just getting names first for consistency)
-          const response = await fetch(`https://pokeapi.co/api/v2/pokemon?offset=0&limit=2000`);
-          const data = await response.json();
-          targetNames = data.results.map((p: any) => p.name);
+          // Default list fetch logic (now using cached names)
+          targetNames = await pokemonApi.getAllPokemonNames();
         }
 
         // Paginate and fetch details
