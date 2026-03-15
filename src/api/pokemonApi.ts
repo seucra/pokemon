@@ -2,6 +2,9 @@ import type { Pokemon } from '../types/pokemon';
 
 const BASE_URL = 'https://pokeapi.co/api/v2';
 
+let cachedNames: string[] | null = null;
+let cachedAbilities: string[] | null = null;
+
 export const pokemonApi = {
   /**
    * Fetch a single Pokemon by name or ID
@@ -17,10 +20,12 @@ export const pokemonApi = {
    * This fetches names to keep the payload small
    */
   async getAllPokemonNames(): Promise<string[]> {
+    if (cachedNames) return cachedNames;
     // There are ~1025 Pokemon as of Gen 9
     const response = await fetch(`${BASE_URL}/pokemon?limit=2000`);
     const data = await response.json();
-    return data.results.map((p: any) => p.name);
+    cachedNames = data.results.map((p: any) => p.name);
+    return cachedNames || [];
   },
 
   /**
@@ -62,5 +67,47 @@ export const pokemonApi = {
     } catch {
       return null;
     }
+  },
+
+  /**
+   * Fetch Pokemon by type
+   */
+  async getPokemonByType(type: string): Promise<string[]> {
+    const response = await fetch(`${BASE_URL}/type/${type.toLowerCase()}`);
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.pokemon.map((p: any) => p.pokemon.name);
+  },
+
+  /**
+   * Fetch Pokemon by generation (using species then mapping to pokemon)
+   */
+  async getPokemonByGeneration(gen: number | string): Promise<string[]> {
+    const response = await fetch(`${BASE_URL}/generation/${gen.toString().toLowerCase()}`);
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.pokemon_species.map((p: any) => p.name);
+  },
+
+  /**
+   * Fetch Pokemon by ability
+   */
+  async getPokemonByAbility(ability: string): Promise<string[]> {
+    const response = await fetch(`${BASE_URL}/ability/${ability.toLowerCase()}`);
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.pokemon.map((p: any) => p.pokemon.name);
+  },
+
+  /**
+   * Fetch a list of all abilities for search
+   */
+  async getAllAbilities(): Promise<string[]> {
+    if (cachedAbilities) return cachedAbilities;
+    const response = await fetch(`${BASE_URL}/ability?limit=2000`);
+    if (!response.ok) return [];
+    const data = await response.json();
+    cachedAbilities = data.results.map((a: any) => a.name);
+    return cachedAbilities || [];
   }
 };
